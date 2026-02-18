@@ -27,6 +27,8 @@ export interface Student extends User {
   universityId?: string;
   university?: University;
   profileCompleted: boolean;
+  degree?: string;
+  graduationYear?: string;
 }
 
 // Company
@@ -35,6 +37,7 @@ export interface Company extends User {
   companyName: string;
   cif: string;
   sector?: string;
+  description?: string;
   verified: boolean;
 }
 
@@ -63,6 +66,8 @@ export interface Offer {
   type: 'full-time' | 'part-time' | 'internship' | 'freelance';
   salary?: string;
   status: 'draft' | 'published' | 'closed';
+  programId?: string;
+  applicationsCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -91,13 +96,15 @@ export interface ApplicationTimeline {
 // Program
 export interface Program {
   id: string;
-  title: string;
+  name: string;
   description: string;
   universityId: string;
   university?: University;
   startDate: string;
   endDate: string;
-  status: 'active' | 'inactive';
+  status: 'draft' | 'active' | 'closed';
+  offersCount?: number;
+  companiesCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -108,7 +115,7 @@ export interface Notification {
   userId: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: 'application' | 'offer' | 'program' | 'course' | 'system';
   read: boolean;
   link?: string;
   createdAt: string;
@@ -119,11 +126,39 @@ export interface Promotion {
   id: string;
   title: string;
   description: string;
-  companyId: string;
+  imageUrl?: string;
+  link?: string;
+  companyId?: string;
   company?: Company;
   startDate: string;
   endDate: string;
   status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Course
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  duration: string; // "2 horas", "1 semana"
+  imageUrl?: string;
+  videoUrl?: string;
+  required: boolean; // Si es obligatorio para acceder a bolsa
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CourseEnrollment {
+  id: string;
+  courseId: string;
+  course?: Course;
+  studentId: string;
+  student?: Student;
+  status: 'not-started' | 'in-progress' | 'completed';
+  progress: number; // 0-100
+  completedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

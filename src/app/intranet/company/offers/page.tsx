@@ -1,9 +1,41 @@
 import { Card, CardBody } from '@/src/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/src/components/ui/button';
+import { api } from '@/src/lib/api/client';
+import { Offer } from '@/src/types';
+import { Badge } from '@/src/components/ui/badge';
+
+async function getMyOffers(): Promise<Offer[]> {
+  try {
+    const response = await api.get<{ data: Offer[] }>('/offers/my');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching offers:', error);
+    return [];
+  }
+}
+
+const offerTypeLabels = {
+  'full-time': 'Tiempo completo',
+  'part-time': 'Medio tiempo',
+  'internship': 'Prácticas',
+  'freelance': 'Freelance',
+};
+
+const statusLabels = {
+  draft: 'Borrador',
+  published: 'Publicada',
+  closed: 'Cerrada',
+};
+
+const statusVariants: Record<Offer['status'], 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
+  draft: 'warning',
+  published: 'success',
+  closed: 'default',
+};
 
 export default async function CompanyOffers() {
-  const offers = [];
+  const offers = await getMyOffers();
 
   return (
     <div className="space-y-6">
@@ -38,7 +70,49 @@ export default async function CompanyOffers() {
             </div>
           </CardBody>
         </Card>
-      ) : null}
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {offers.map((offer) => (
+            <Card key={offer.id}>
+              <CardBody>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/intranet/company/offers/${offer.id}`}
+                        className="text-xl font-semibold text-gray-900 hover:text-blue-600"
+                      >
+                        {offer.title}
+                      </Link>
+                      <Badge variant={statusVariants[offer.status]}>
+                        {statusLabels[offer.status]}
+                      </Badge>
+                    </div>
+                    <p className="text-gray-700 mt-2 line-clamp-2">
+                      {offer.description}
+                    </p>
+                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
+                      <span>📍 {offer.location}</span>
+                      <span>📝 {offerTypeLabels[offer.type]}</span>
+                      {offer.salary && <span>💰 {offer.salary}</span>}
+                      <span className="text-xs text-gray-500">
+                        {new Date(offer.createdAt).toLocaleDateString('es-ES')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="ml-6 flex gap-2">
+                    <Link href={`/intranet/company/offers/${offer.id}/edit`}>
+                      <Button size="sm" variant="outline">
+                        Editar
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

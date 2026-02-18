@@ -1,10 +1,32 @@
 import { getSession } from '@/src/lib/auth/session';
 import { Card, CardBody } from '@/src/components/ui/card';
+import { PromotionsBanner } from '@/src/components/promotions/promotions-banner';
+import { Promotion } from '@/src/types';
 import Link from 'next/link';
 import { Button } from '@/src/components/ui/button';
 
+async function getPromotions(): Promise<Promotion[]> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/promotions/active`, {
+      cache: 'no-store',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    return data.data || [];
+  } catch (error) {
+    console.error('Error fetching promotions:', error);
+    return [];
+  }
+}
+
 export default async function CompanyDashboard() {
   const user = await getSession();
+  const promotions = await getPromotions();
 
   return (
     <div className="space-y-6">
@@ -21,6 +43,9 @@ export default async function CompanyDashboard() {
           <Button>+ Nueva oferta</Button>
         </Link>
       </div>
+
+      {/* Promotions Banner */}
+      {promotions.length > 0 && <PromotionsBanner promotions={promotions} />}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

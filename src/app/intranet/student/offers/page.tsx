@@ -1,7 +1,7 @@
 import { api } from '@/src/lib/api/client';
-import { Offer } from '@/src/types';
-import { Card, CardBody, CardHeader } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
+import { Offer, CourseEnrollment } from '@/src/types';
+import { Card, CardBody } from '@/src/components/ui/card';
+import { OffersPageClient } from './page.client';
 import Link from 'next/link';
 
 // Ejemplo de llamada a API desde server component
@@ -15,82 +15,132 @@ async function getOffers(): Promise<Offer[]> {
   }
 }
 
-export default async function StudentOffers() {
-  const offers = await getOffers();
+async function getEnrollments(): Promise<CourseEnrollment[]> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/enrollments`, {
+      cache: 'no-store',
+      credentials: 'include',
+    });
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    return data.data || [];
+  } catch (error) {
+    console.error('Error fetching enrollments:', error);
+    return [];
+  }
+}
+
+export default async function StudentOffers() {
+  const [offers, enrollments] = await Promise.all([
+    getOffers(),
+    getEnrollments(),
+  ]);
+
+  // Check if user has completed all required courses
+  const requiredCourses = enrollments.filter((e) => e.course?.required);
+  const completedRequiredCourses = requiredCourses.filter(
+    (e) => e.status === 'completed'
+  );
+  const hasAccessToOffers = requiredCourses.length === 0 || requiredCourses.length === completedRequiredCourses.length;
+
+  // If required courses not completed, show gating message
+  if (!hasAccessToOffers) {
+    const pendingCount = requiredCourses.length - completedRequiredCourses.length;
+
+    return (
+      <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Ofertas de empleo</h1>
           <p className="text-gray-600 mt-2">
-            Explora las últimas oportunidades disponibles
+            Completa los cursos obligatorios para acceder
           </p>
         </div>
+
+        <Card>
+          <CardBody>
+            <div className="text-center py-12">
+              <div className="mb-6">
+                <span className="text-6xl">🔒</span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                Acceso restringido
+              </h2>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                Para acceder a la bolsa de empleos, primero debes completar{' '}
+                <span className="font-semibold text-gray-900">
+                  {pendingCount} curso{pendingCount > 1 ? 's' : ''} obligatorio{pendingCount > 1 ? 's' : ''}
+                </span>
+                .
+              </p>
+
+              {/* List of pending required courses */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 max-w-md mx-auto">
+                <h3 className="font-semibold text-yellow-900 mb-2 flex items-center justify-center gap-2">
+                  <span>⚠️</span>
+                  Cursos pendientes
+                </h3>
+                <ul className="text-sm text-yellow-800 space-y-1">
+                  {requiredCourses
+                    .filter((e) => e.status !== 'completed')
+                    .map((enrollment) => (
+                      <li key={enrollment.id} className="flex items-center justify-center gap-2">
+                        <span>•</span>
+                        {enrollment.course?.title}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+
+              <Link
+                href="/intranet/student/courses"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+              >
+                Ir a mis cursos
+                <svg
+                  className="ml-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </Link>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Ofertas de empleo</h1>
+        <p className="text-gray-600 mt-2">
+          Explora las últimas oportunidades disponibles
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        {offers.length === 0 ? (
-          <Card>
-            <CardBody>
-              <p className="text-center text-gray-600 py-8">
-                No hay ofertas disponibles en este momento
-              </p>
-            </CardBody>
-          </Card>
-        ) : (
-          offers.map((offer) => (
-            <Card key={offer.id}>
-              <CardBody>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <Link
-                      href={`/intranet/student/offers/${offer.id}`}
-                      className="text-xl font-semibold text-gray-900 hover:text-blue-600"
-                    >
-                      {offer.title}
-                    </Link>
-                    <p className="text-gray-600 mt-1">
-                      {offer.company?.companyName || 'Empresa confidencial'}
-                    </p>
-                    <p className="text-gray-700 mt-2 line-clamp-2">
-                      {offer.description}
-                    </p>
-                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
-                      <span className="flex items-center">
-                        <svg
-                          className="w-4 h-4 mr-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                        {offer.location}
-                      </span>
-                      {offer.salary && <span>💰 {offer.salary}</span>}
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <Badge>{offer.type}</Badge>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          ))
-        )}
-      </div>
+      {offers.length === 0 ? (
+        <Card>
+          <CardBody>
+            <p className="text-center text-gray-600 py-8">
+              No hay ofertas disponibles en este momento
+            </p>
+          </CardBody>
+        </Card>
+      ) : (
+        <OffersPageClient initialOffers={offers} />
+      )}
     </div>
   );
 }

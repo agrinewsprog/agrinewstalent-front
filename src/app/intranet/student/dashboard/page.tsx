@@ -1,10 +1,32 @@
 import { getSession } from '@/src/lib/auth/session';
 import { Card, CardBody, CardHeader } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
+import { PromotionsBanner } from '@/src/components/promotions/promotions-banner';
+import { Promotion } from '@/src/types';
 import Link from 'next/link';
+
+async function getPromotions(): Promise<Promotion[]> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/promotions/active`, {
+      cache: 'no-store',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    return data.data || [];
+  } catch (error) {
+    console.error('Error fetching promotions:', error);
+    return [];
+  }
+}
 
 export default async function StudentDashboard() {
   const user = await getSession();
+  const promotions = await getPromotions();
 
   return (
     <div className="space-y-6">
@@ -16,6 +38,9 @@ export default async function StudentDashboard() {
           Aquí tienes un resumen de tu actividad
         </p>
       </div>
+
+      {/* Promotions Banner */}
+      {promotions.length > 0 && <PromotionsBanner promotions={promotions} />}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

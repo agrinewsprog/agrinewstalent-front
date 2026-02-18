@@ -2,9 +2,9 @@ import { api } from '@/src/lib/api/client';
 import { Offer } from '@/src/types';
 import { Card, CardBody, CardHeader } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ApplyButton } from './apply-button';
 
 async function getOffer(id: string): Promise<Offer | null> {
   try {
@@ -15,6 +15,13 @@ async function getOffer(id: string): Promise<Offer | null> {
     return null;
   }
 }
+
+const offerTypeLabels = {
+  'full-time': 'Tiempo completo',
+  'part-time': 'Medio tiempo',
+  'internship': 'Prácticas',
+  'freelance': 'Freelance',
+};
 
 export default async function OfferDetail({
   params,
@@ -47,7 +54,7 @@ export default async function OfferDetail({
                 {offer.company?.companyName || 'Empresa confidencial'}
               </p>
             </div>
-            <Badge>{offer.type}</Badge>
+            <Badge>{offerTypeLabels[offer.type]}</Badge>
           </div>
         </CardHeader>
         <CardBody>
@@ -76,6 +83,9 @@ export default async function OfferDetail({
                 {offer.location}
               </span>
               {offer.salary && <span>💰 {offer.salary}</span>}
+              <span className="text-sm text-gray-500">
+                Publicada: {new Date(offer.createdAt).toLocaleDateString('es-ES')}
+              </span>
             </div>
 
             <div>
@@ -86,7 +96,7 @@ export default async function OfferDetail({
             </div>
 
             <div className="pt-6 border-t border-gray-200">
-              <Button size="lg">Aplicar a esta oferta</Button>
+              <ApplyButton offerId={offer.id} />
             </div>
           </div>
         </CardBody>
