@@ -1,117 +1,255 @@
-import { Card, CardBody } from '@/src/components/ui/card';
-import Link from 'next/link';
-import { Button } from '@/src/components/ui/button';
-import { api } from '@/src/lib/api/client';
-import { Offer } from '@/src/types';
-import { Badge } from '@/src/components/ui/badge';
+'use client';
 
-async function getMyOffers(): Promise<Offer[]> {
-  try {
-    const response = await api.get<{ data: Offer[] }>('/offers/my');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching offers:', error);
-    return [];
+import { useState, useEffect } from 'react';
+import { PlusIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import OfferForm, { type Offer } from '@/src/components/company/OfferForm';
+import CompanyOffersList from '@/src/components/company/CompanyOffersList';
+
+export default function CompanyOffersPage() {
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingOffer, setEditingOffer] = useState<Offer | undefined>(undefined);
+  const [filterEstado, setFilterEstado] = useState<string>('Todas');
+
+  useEffect(() => {
+    fetchOffers();
+  }, []);
+
+  const fetchOffers = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/company/offers`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cargar las ofertas');
+      }
+
+      const data = await response.json();
+      setOffers(data);
+    } catch (err) {
+      console.error('Error fetching offers:', err);
+      setError(err instanceof Error ? err.message : 'Error al cargar las ofertas');
+
+      // Mock data para desarrollo
+      setOffers([
+        {
+          id: '1',
+          titulo: 'Desarrollador Full Stack Junior',
+          categoria: 'Empleo',
+          jornada: 'Completa',
+          modalidad: 'Híbrido',
+          descripcion:
+            'Buscamos un desarrollador Full Stack apasionado por la tecnología para unirse a nuestro equipo. Trabajarás en proyectos innovadores utilizando las últimas tecnologías del mercado.',
+          requisitos:
+            '- 1-2 años de experiencia en desarrollo web\n- Conocimientos en React y Node.js\n- Inglés nivel intermedio\n- Actitud proactiva y ganas de aprender',
+          empresa: 'Tech Solutions',
+          ubicacion: 'Madrid, España',
+          fechaPublicacion: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          estado: 'Abierta',
+        },
+        {
+          id: '2',
+          titulo: 'Prácticas en Marketing Digital',
+          categoria: 'Prácticas',
+          jornada: 'Parcial',
+          modalidad: 'Presencial',
+          descripcion:
+            'Ofrecemos una oportunidad única para estudiantes que quieran aprender sobre marketing digital en un entorno dinámico y colaborativo.',
+          requisitos:
+            '- Estudiante de Marketing, Publicidad o similar\n- Conocimientos básicos de redes sociales\n- Creatividad y capacidad de trabajo en equipo',
+          empresa: 'Marketing Pro',
+          ubicacion: 'Barcelona, España',
+          fechaPublicacion: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          estado: 'Abierta',
+        },
+        {
+          id: '3',
+          titulo: 'Ingeniero de Datos Senior',
+          categoria: 'Empleo',
+          jornada: 'Completa',
+          modalidad: 'Remoto',
+          descripcion:
+            'Únete a nuestro equipo de Data Engineering para diseñar e implementar soluciones de datos escalables y eficientes.',
+          requisitos:
+            '- +3 años experiencia en ingeniería de datos\n- Experto en SQL, Python, Spark\n- Experiencia con AWS o Azure\n- Inglés fluido',
+          empresa: 'Data Corp',
+          ubicacion: 'Remoto',
+          fechaPublicacion: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+          estado: 'Cerrada',
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveOffer = async (offer: Offer) => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const isEditing = !!offer.id;
+
+      const response = await fetch(
+        isEditing ? `${apiUrl}/company/offers/${offer.id}` : `${apiUrl}/company/offers`,
+        {
+          method: isEditing ? 'PUT' : 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(offer),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Error al guardar la oferta');
+      }
+
+      const savedOffer = await response.json();
+
+      if (isEditing) {
+        setOffers((prev) =>
+          prev.map((o) => (o.id === savedOffer.id ? savedOffer : o))
+        );
+      } else {
+        setOffers((prev) => [savedOffer, ...prev]);
+      }
+
+      setShowForm(false);
+      setEditingOffer(undefined);
+      alert(isEditing ? 'Oferta actualizada correctamente' : 'Oferta publicada correctamente');
+    } catch (err) {
+      console.error('Error saving offer:', err);
+      throw err;
+    }
+  };
+
+  const handleEditOffer = (offer: Offer) => {
+    setEditingOffer(offer);
+    setShowForm(true);
+  };
+
+  const handleCancelForm = () => {
+    setShowForm(false);
+    setEditingOffer(undefined);
+  };
+
+  const handleNewOffer = () => {
+    setEditingOffer(undefined);
+    setShowForm(true);
+  };
+
+  const filteredOffers = offers.filter((offer) => {
+    if (filterEstado === 'Todas') return true;
+    return offer.estado === filterEstado;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando ofertas...</p>
+        </div>
+      </div>
+    );
   }
-}
-
-const offerTypeLabels = {
-  'full-time': 'Tiempo completo',
-  'part-time': 'Medio tiempo',
-  'internship': 'Prácticas',
-  'freelance': 'Freelance',
-};
-
-const statusLabels = {
-  draft: 'Borrador',
-  published: 'Publicada',
-  closed: 'Cerrada',
-};
-
-const statusVariants: Record<Offer['status'], 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
-  draft: 'warning',
-  published: 'success',
-  closed: 'default',
-};
-
-export default async function CompanyOffers() {
-  const offers = await getMyOffers();
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mis Ofertas</h1>
-          <p className="text-gray-600 mt-2">
-            Gestiona tus ofertas de empleo
-          </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Mis vacantes</h1>
+            <p className="text-gray-600 mt-2">
+              Gestiona tus ofertas de empleo y prácticas publicadas
+            </p>
+          </div>
+          <button
+            onClick={handleNewOffer}
+            className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors shadow-md hover:shadow-lg"
+          >
+            <PlusIcon className="h-5 w-5" />
+            Publicar vacante
+          </button>
         </div>
-        <Link href="/intranet/company/offers/new">
-          <Button>+ Nueva oferta</Button>
-        </Link>
+
+        {/* Estadísticas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <p className="text-sm text-gray-600 mb-1">Total vacantes</p>
+            <p className="text-3xl font-bold text-gray-900">{offers.length}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <p className="text-sm text-gray-600 mb-1">Abiertas</p>
+            <p className="text-3xl font-bold text-green-600">
+              {offers.filter((o) => o.estado === 'Abierta').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <p className="text-sm text-gray-600 mb-1">Cerradas</p>
+            <p className="text-3xl font-bold text-gray-600">
+              {offers.filter((o) => o.estado === 'Cerrada').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <p className="text-sm text-gray-600 mb-1">Borradores</p>
+            <p className="text-3xl font-bold text-yellow-600">
+              {offers.filter((o) => o.estado === 'Borrador').length}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {offers.length === 0 ? (
-        <Card>
-          <CardBody>
-            <div className="text-center py-12">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No tienes ofertas publicadas
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Comienza a publicar ofertas para atraer talento
-              </p>
-              <Link href="/intranet/company/offers/new">
-                <Button>Crear primera oferta</Button>
-              </Link>
-            </div>
-          </CardBody>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {offers.map((offer) => (
-            <Card key={offer.id}>
-              <CardBody>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <Link
-                        href={`/intranet/company/offers/${offer.id}`}
-                        className="text-xl font-semibold text-gray-900 hover:text-blue-600"
-                      >
-                        {offer.title}
-                      </Link>
-                      <Badge variant={statusVariants[offer.status]}>
-                        {statusLabels[offer.status]}
-                      </Badge>
-                    </div>
-                    <p className="text-gray-700 mt-2 line-clamp-2">
-                      {offer.description}
-                    </p>
-                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
-                      <span>📍 {offer.location}</span>
-                      <span>📝 {offerTypeLabels[offer.type]}</span>
-                      {offer.salary && <span>💰 {offer.salary}</span>}
-                      <span className="text-xs text-gray-500">
-                        {new Date(offer.createdAt).toLocaleDateString('es-ES')}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="ml-6 flex gap-2">
-                    <Link href={`/intranet/company/offers/${offer.id}/edit`}>
-                      <Button size="sm" variant="outline">
-                        Editar
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+      {/* Filtros */}
+      <div className="mb-6 flex items-center gap-4">
+        <div className="flex items-center gap-2 text-gray-700">
+          <FunnelIcon className="h-5 w-5" />
+          <span className="font-medium">Filtrar:</span>
+        </div>
+        <div className="flex gap-2">
+          {['Todas', 'Abierta', 'Cerrada', 'Borrador'].map((estado) => (
+            <button
+              key={estado}
+              onClick={() => setFilterEstado(estado)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filterEstado === estado
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {estado}
+            </button>
           ))}
         </div>
+      </div>
+
+      {/* Lista de ofertas */}
+      {error && !offers.length ? (
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={fetchOffers}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      ) : (
+        <CompanyOffersList offers={filteredOffers} onEdit={handleEditOffer} />
+      )}
+
+      {/* Modal de formulario */}
+      {showForm && (
+        <OfferForm
+          initialOffer={editingOffer}
+          onSave={handleSaveOffer}
+          onCancel={handleCancelForm}
+        />
       )}
     </div>
   );

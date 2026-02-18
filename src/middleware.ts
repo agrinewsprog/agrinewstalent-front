@@ -1,27 +1,23 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000';
 
-// Rutas públicas que no requieren autenticación
-const PUBLIC_ROUTES = ['/', '/about', '/contact', '/pricing'];
-const AUTH_ROUTES = ['/login', '/register', '/forgot-password'];
-
-// Mapeo de roles a sus dashboards
-const ROLE_DASHBOARDS = {
-  student: '/intranet/student/dashboard',
-  company: '/intranet/company/dashboard',
-  university: '/intranet/university/dashboard',
-  admin: '/intranet/admin/dashboard',
+// Mapeo de roles a rutas permitidas
+const ROLE_PATHS = {
+  STUDENT: '/intranet/student',
+  COMPANY: '/intranet/company',
+  UNIVERSITY: '/intranet/university',
+  SUPER_ADMIN: '/intranet/admin',
 } as const;
 
-type Role = keyof typeof ROLE_DASHBOARDS;
+type UserRole = keyof typeof ROLE_PATHS;
 
-interface MeResponse {
+interface AuthMeResponse {
   user: {
     id: string;
     email: string;
-    role: Role;
+    role: UserRole;
     name: string;
   };
 }
@@ -29,60 +25,54 @@ interface MeResponse {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Si es ruta pública, permitir acceso
-  if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/api')) {
+  // Solo verificar sesión en rutas /intranet
+  if (!pathname.startsWith('/intranet')) {
     return NextResponse.next();
   }
 
-  // Verificar sesión llamando a /auth/me
-  let user: MeResponse['user'] | null = null;
+  // Verificar sesión
+  let user: AuthMeResponse['user'] | null = null;
 
   try {
-    const response = await fetch(`${API_URL}/auth/me`, {
+    const response = await fetch(`${API_URL}/api/auth/me`, {
       headers: {
-        Cookie: request.headers.get('cookie') || '',
+        cookie: request.headers.get('cookie') || '',
       },
-      credentials: 'include',
+      cache: 'no-store',
     });
 
     if (response.ok) {
-      const data: MeResponse = await response.json();
+      const data: AuthMeResponse = await response.json();
       user = data.user;
     }
   } catch (error) {
-    console.error('Error verificando sesión:', error);
-  }
-
-  // Si no hay sesión y está en ruta de autenticación, permitir
-  if (!user && AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
-    return NextResponse.next();
-  }
-
-  // Si no hay sesión y NO está en ruta de autenticación, redirigir a login
-  if (!user && !AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
+    // API caída o error de red
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[Middleware] Session check failed:', error instanceof Error ? error.message : 'Unknown error');
+    }
+    // Redirigir a login si está en intranet y falla la verificación
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
   }
 
-  // Si hay sesión y está en ruta de autenticación, redirigir a su dashboard
-  if (user && AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
+  // Si no hay usuario, redirigir a login
+  if (!user) {
     const url = request.nextUrl.clone();
-    url.pathname = ROLE_DASHBOARDS[user.role];
+    url.pathname = '/login';
+    url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
   }
 
-  // Si está en intranet, verificar que el rol coincida
-  if (pathname.startsWith('/intranet/') && user) {
-    const roleFromPath = pathname.split('/')[2] as Role;
-
-    // Si el rol en la URL no coincide con el rol del usuario, redirigir a su dashboard
-    if (roleFromPath !== user.role) {
-      const url = request.nextUrl.clone();
-      url.pathname = ROLE_DASHBOARDS[user.role];
-      return NextResponse.redirect(url);
-    }
+  // Verificar que el usuario está en su ruta correcta según rol
+  const allowedPath = ROLE_PATHS[user.role];
+  
+  if (!pathname.startsWith(allowedPath)) {
+    // Redirigir a su dashboard correcto
+    const url = request.nextUrl.clone();
+    url.pathname = `${allowedPath}/dashboard`;
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
@@ -90,13 +80,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\..*|public).*)',
+    '/intranet/:path*',
   ],
 };
