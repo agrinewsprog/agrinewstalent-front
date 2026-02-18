@@ -1,0 +1,116 @@
+src/
+├── app/
+│   ├── (public)/
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── (auth)/
+│   │   ├── layout.tsx
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   └── register/
+│   │       └── page.tsx
+│   ├── intranet/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── student/
+│   │   │   ├── layout.tsx
+│   │   │   ├── layout.client.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile/
+│   │   │   │   └── page.tsx
+│   │   │   ├── offers/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── applications/
+│   │   │   │   └── page.tsx
+│   │   │   ├── programs/
+│   │   │   │   └── page.tsx
+│   │   │   └── notifications/
+│   │   │       └── page.tsx
+│   │   ├── company/
+│   │   │   ├── layout.tsx
+│   │   │   ├── layout.client.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile/
+│   │   │   │   └── page.tsx
+│   │   │   ├── offers/
+│   │   │   │   └── page.tsx
+│   │   │   ├── applications/
+│   │   │   │   └── page.tsx
+│   │   │   ├── programs/
+│   │   │   │   └── page.tsx
+│   │   │   └── promotions/
+│   │   │       └── page.tsx
+│   │   ├── university/
+│   │   │   ├── layout.tsx
+│   │   │   ├── layout.client.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile/
+│   │   │   │   └── page.tsx
+│   │   │   ├── students/
+│   │   │   │   └── page.tsx
+│   │   │   ├── invites/
+│   │   │   │   └── page.tsx
+│   │   │   └── programs/
+│   │   │       └── page.tsx
+│   │   └── admin/
+│   │       ├── layout.tsx
+│   │       ├── layout.client.tsx
+│   │       ├── dashboard/
+│   │       │   └── page.tsx
+│   │       ├── users/
+│   │       │   └── page.tsx
+│   │       ├── companies/
+│   │       │   └── page.tsx
+│   │       ├── universities/
+│   │       │   └── page.tsx
+│   │       ├── offers/
+│   │       │   └── page.tsx
+│   │       ├── applications/
+│   │       │   └── page.tsx
+│   │       └── promotions/
+│   │           └── page.tsx
+│   ├── layout.tsx
+│   └── globals.css
+├── components/
+│   ├── ui/
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   ├── select.tsx
+│   │   ├── textarea.tsx
+│   │   ├── card.tsx
+│   │   ├── table.tsx
+│   │   ├── badge.tsx
+│   │   └── modal.tsx
+│   └── intranet/
+│       ├── sidebar.tsx
+│       ├── topbar.tsx
+│       └── role-guard.tsx
+├── lib/
+│   ├── api/
+│   │   └── client.ts
+│   ├── auth/
+│   │   └── session.ts
+│   └── utils.ts
+├── hooks/
+│   ├── use-me.ts
+│   └── use-toast.ts
+├── types/
+│   └── index.ts
+└── middleware.ts
+
+Archivos raíz:
+├── .env.example
+├── package.json
+├── tsconfig.json
+├── next.config.ts
+├── postcss.config.mjs
+├── eslint.config.mjs
+├── SCAFFOLD_README.md
+└── README.md
+
+TOTAL: ~80+ archivos generados
