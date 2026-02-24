@@ -11,7 +11,7 @@ interface NotificationsListProps {
 }
 
 export function NotificationsList({
-  notifications,
+  notifications = [],
   onMarkAsRead,
   onNotificationClick,
 }: NotificationsListProps) {
@@ -41,7 +41,7 @@ export function NotificationsList({
     }
   };
 
-  if (notifications.length === 0) {
+  if ((notifications ?? []).length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
         <p className="text-lg">No tienes notificaciones</p>
@@ -51,7 +51,7 @@ export function NotificationsList({
 
   return (
     <div className="space-y-2">
-      {notifications.map((notification) => (
+      {(notifications ?? []).map((notification) => (
         <div
           key={notification.id}
           onClick={() => handleNotificationClick(notification)}

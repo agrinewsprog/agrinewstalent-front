@@ -128,12 +128,12 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
             )}
           </div>
 
-          {/* Idiomas */}
-          {candidate.idiomas && candidate.idiomas.length > 0 && (
+          {/* Idiomas - Variable undefined: candidate.idiomas */}
+          {candidate.idiomas && (candidate.idiomas ?? []).length > 0 && (
             <div className="flex items-center gap-2 mb-4">
               <LanguageIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
               <div className="flex flex-wrap gap-2">
-                {candidate.idiomas.slice(0, 3).map((idioma, index) => (
+                {(candidate.idiomas ?? []).slice(0, 3).map((idioma, index) => (
                   <span
                     key={index}
                     className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-xs text-gray-700"
@@ -141,9 +141,9 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
                     {idioma}
                   </span>
                 ))}
-                {candidate.idiomas.length > 3 && (
+                {(candidate.idiomas ?? []).length > 3 && (
                   <span className="text-xs text-gray-500">
-                    +{candidate.idiomas.length - 3} más
+                    +{(candidate.idiomas ?? []).length - 3} más
                   </span>
                 )}
               </div>

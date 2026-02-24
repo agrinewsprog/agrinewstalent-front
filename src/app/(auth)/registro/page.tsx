@@ -19,7 +19,7 @@ interface TabOption {
 const tabs: TabOption[] = [
   {
     value: 'student',
-    label: 'Soy estudiante',
+    label: 'Soy usuario',
     icon: UserCircleIcon,
     description: 'Encuentra prácticas y oportunidades laborales',
   },

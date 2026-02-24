@@ -19,7 +19,7 @@ export default function CompanyOffersPage() {
 
   const fetchOffers = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/company/offers`, {
         credentials: 'include',
       });
@@ -89,7 +89,7 @@ export default function CompanyOffersPage() {
 
   const handleSaveOffer = async (offer: Offer) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const isEditing = !!offer.id;
 
       const response = await fetch(

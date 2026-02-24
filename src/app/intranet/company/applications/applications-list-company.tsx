@@ -11,10 +11,10 @@ interface ApplicationsListCompanyProps {
   applications: Application[];
 }
 
-export function ApplicationsListCompany({ applications: initialApplications }: ApplicationsListCompanyProps) {
+export function ApplicationsListCompany({ applications: initialApplications = [] }: ApplicationsListCompanyProps) {
   const router = useRouter();
   const { success, error: showError } = useToast();
-  const [applications, setApplications] = useState(initialApplications);
+  const [applications, setApplications] = useState(initialApplications ?? []);
 
   const handleStatusChange = async (applicationId: string, status: Application['status']) => {
     try {

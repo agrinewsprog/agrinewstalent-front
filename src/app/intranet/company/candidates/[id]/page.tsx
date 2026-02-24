@@ -72,7 +72,7 @@ export default function CandidateDetailPage() {
 
   const fetchCandidate = async (id: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/company/candidates/${id}`, {
         credentials: 'include',
       });
@@ -146,7 +146,7 @@ export default function CandidateDetailPage() {
     if (!messageText.trim() || !candidate) return;
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/company/candidates/${candidate.id}/message`, {
         method: 'POST',
         credentials: 'include',

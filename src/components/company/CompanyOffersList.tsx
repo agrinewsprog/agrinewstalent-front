@@ -8,8 +8,9 @@ interface CompanyOffersListProps {
   onEdit: (offer: Offer) => void;
 }
 
-export default function CompanyOffersList({ offers, onEdit }: CompanyOffersListProps) {
-  if (offers.length === 0) {
+export default function CompanyOffersList({ offers = [], onEdit }: CompanyOffersListProps) {
+  // Variable undefined: offers
+  if ((offers ?? []).length === 0) {
     return (
       <div className="text-center py-12">
         <BriefcaseIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
@@ -54,7 +55,7 @@ export default function CompanyOffersList({ offers, onEdit }: CompanyOffersListP
 
   return (
     <div className="space-y-4">
-      {offers.map((offer) => (
+      {(offers ?? []).map((offer) => (
         <div
           key={offer.id}
           className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-6"

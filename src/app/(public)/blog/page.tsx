@@ -8,8 +8,8 @@ export const metadata = {
 };
 
 export default function BlogPage() {
-  const posts = getAllPosts();
-  const categories = getAllCategories();
+  const posts = getAllPosts() ?? [];
+  const categories = getAllCategories() ?? [];
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

@@ -29,14 +29,15 @@ const statusVariants: Record<Application['status'], 'default' | 'success' | 'war
 };
 
 export function ApplicationsList({
-  applications,
+  applications = [],
   showOffer = true,
   showStudent = false,
   onStatusChange,
 }: ApplicationsListProps) {
+  // Variable undefined: applications
   return (
     <div className="space-y-4">
-      {applications.length === 0 ? (
+      {(applications ?? []).length === 0 ? (
         <Card>
           <CardBody>
             <p className="text-center text-gray-600 py-8">
@@ -45,7 +46,7 @@ export function ApplicationsList({
           </CardBody>
         </Card>
       ) : (
-        applications.map((application) => (
+        (applications ?? []).map((application) => (
           <Card key={application.id}>
             <CardBody>
               <div className="flex items-start justify-between">

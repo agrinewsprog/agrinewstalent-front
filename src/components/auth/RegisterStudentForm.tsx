@@ -2,32 +2,42 @@
 
 import { useState } from 'react';
 import { z } from 'zod';
-import { UserIcon, EnvelopeIcon, LockClosedIcon, CalendarIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { UserIcon, EnvelopeIcon, LockClosedIcon, CalendarIcon, GlobeAltIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
+import { api } from '@/src/lib/api/client';
 
-// Schema de validación con Zod
-const studentSchema = z.object({
-  nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  apellidos: z.string().min(2, 'Los apellidos deben tener al menos 2 caracteres'),
-  fechaNacimiento: z.string().min(1, 'La fecha de nacimiento es obligatoria'),
-  email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  repeatPassword: z.string(),
-  pais: z.string().min(1, 'Debe seleccionar un país'),
-  aceptarTerminos: z.boolean().refine((val) => val === true, {
-    message: 'Debe aceptar los términos y condiciones',
-  }),
-}).refine((data) => data.password === data.repeatPassword, {
-  message: 'Las contraseñas no coinciden',
-  path: ['repeatPassword'],
-});
+// Schema de validación con Zod - condicional según isStudent
+const createStudentSchema = (isStudent: boolean) => {
+  const baseSchema = z.object({
+    nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+    apellidos: z.string().min(2, 'Los apellidos deben tener al menos 2 caracteres'),
+    fechaNacimiento: z.string().min(1, 'La fecha de nacimiento es obligatoria'),
+    email: z.string().email('Email inválido'),
+    password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+    repeatPassword: z.string(),
+    pais: z.string().min(1, 'Debe seleccionar un país'),
+    isStudent: z.boolean(),
+    universidad: isStudent ? z.string().optional() : z.string().optional(),
+    inviteCode: isStudent ? z.string().optional() : z.string().optional(),
+    aceptarTerminos: z.boolean().refine((val) => val === true, {
+      message: 'Debe aceptar los términos y condiciones',
+    }),
+  });
+  
+  return baseSchema.refine((data) => data.password === data.repeatPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['repeatPassword'],
+  });
+};
 
-type StudentFormData = z.infer<typeof studentSchema>;
+type StudentFormData = z.infer<ReturnType<typeof createStudentSchema>>;
 
 interface RegisterStudentFormProps {
   onSuccess?: () => void;
 }
 
 export default function RegisterStudentForm({ onSuccess }: RegisterStudentFormProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState<Partial<StudentFormData>>({
     nombre: '',
     apellidos: '',
@@ -36,6 +46,9 @@ export default function RegisterStudentForm({ onSuccess }: RegisterStudentFormPr
     password: '',
     repeatPassword: '',
     pais: '',
+    isStudent: true,
+    universidad: '',
+    inviteCode: '',
     aceptarTerminos: false,
   });
 
@@ -58,12 +71,20 @@ export default function RegisterStudentForm({ onSuccess }: RegisterStudentFormPr
     }
   };
 
+  const handleProfileTypeChange = (value: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      isStudent: value,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setSubmitError('');
 
     // Validar con Zod
+    const studentSchema = createStudentSchema(formData.isStudent ?? true);
     const result = studentSchema.safeParse(formData);
 
     if (!result.success) {
@@ -79,36 +100,34 @@ export default function RegisterStudentForm({ onSuccess }: RegisterStudentFormPr
     setIsSubmitting(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role: 'student',
-          ...result.data,
-        }),
-      });
+      const payload = {
+        role: 'STUDENT',
+        firstName:            result.data.nombre,
+        lastName:             result.data.apellidos,
+        dateOfBirth:          result.data.fechaNacimiento,
+        email:                result.data.email,
+        password:             result.data.password,
+        country:              result.data.pais,
+        isStudent:            result.data.isStudent,
+        isActiveStudent:      result.data.isStudent,
+        universityInviteCode: result.data.inviteCode,
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al registrar usuario');
-      }
+      await api.post('/api/auth/register', payload);
 
-      const data = await response.json();
-      console.log('Registro exitoso:', data);
-
-      // Llamar callback de éxito
+      // Redirigir a dashboard de estudiante
       if (onSuccess) {
         onSuccess();
       } else {
-        // Redirigir a login o dashboard
-        window.location.href = '/login';
+        router.push('/intranet/student/dashboard');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al registrar:', error);
-      setSubmitError(error instanceof Error ? error.message : 'Error al registrar usuario');
+      const apiMessage =
+        error?.data?.error?.message ||
+        error?.message ||
+        'Error al registrar usuario';
+      setSubmitError(apiMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -121,6 +140,45 @@ export default function RegisterStudentForm({ onSuccess }: RegisterStudentFormPr
           {submitError}
         </div>
       )}
+
+      {/* Selector: Busco empleo vs Soy estudiante */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          ¿Cuál es tu situación? *
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => handleProfileTypeChange(false)}
+            className={`p-4 border-2 rounded-lg transition-all ${
+              !formData.isStudent
+                ? 'border-green-600 bg-green-50 text-green-700'
+                : 'border-gray-300 hover:border-gray-400'
+            }`}
+          >
+            <div className="flex flex-col items-center">
+              <UserIcon className={`h-8 w-8 mb-2 ${!formData.isStudent ? 'text-green-600' : 'text-gray-400'}`} />
+              <span className="font-semibold text-sm">Busco empleo</span>
+              <span className="text-xs text-gray-500 mt-1">Profesional</span>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleProfileTypeChange(true)}
+            className={`p-4 border-2 rounded-lg transition-all ${
+              formData.isStudent
+                ? 'border-green-600 bg-green-50 text-green-700'
+                : 'border-gray-300 hover:border-gray-400'
+            }`}
+          >
+            <div className="flex flex-col items-center">
+              <AcademicCapIcon className={`h-8 w-8 mb-2 ${formData.isStudent ? 'text-green-600' : 'text-gray-400'}`} />
+              <span className="font-semibold text-sm">Soy estudiante</span>
+              <span className="text-xs text-gray-500 mt-1">Actualmente estudiando</span>
+            </div>
+          </button>
+        </div>
+      </div>
 
       {/* Nombre y Apellidos en grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -302,6 +360,49 @@ export default function RegisterStudentForm({ onSuccess }: RegisterStudentFormPr
         {errors.pais && <p className="mt-1 text-sm text-red-600">{errors.pais}</p>}
       </div>
 
+      {/* Campos condicionales para estudiantes */}
+      {formData.isStudent && (
+        <>
+          <div>
+            <label htmlFor="universidad" className="block text-sm font-medium text-gray-700 mb-2">
+              Universidad (opcional)
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <AcademicCapIcon className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                id="universidad"
+                name="universidad"
+                value={formData.universidad}
+                onChange={handleChange}
+                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="Universidad de..."
+              />
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Indica tu universidad si deseas conectar con ofertas específicas
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700 mb-2">
+              Código de invitación (opcional)
+            </label>
+            <input
+              type="text"
+              id="inviteCode"
+              name="inviteCode"
+              value={formData.inviteCode}
+              onChange={handleChange}
+              className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              placeholder="Código proporcionado por tu universidad"
+            />
+          </div>
+        </>
+      )}
+
       {/* Términos y condiciones */}
       <div>
         <label className="flex items-start">
@@ -332,7 +433,7 @@ export default function RegisterStudentForm({ onSuccess }: RegisterStudentFormPr
         disabled={isSubmitting}
         className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
       >
-        {isSubmitting ? 'Registrando...' : 'Crear cuenta de estudiante'}
+        {isSubmitting ? 'Registrando...' : 'Crear mi cuenta'}
       </button>
 
       {/* Link a login */}

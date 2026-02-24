@@ -9,14 +9,14 @@ interface JobsListProps {
   initialOffers: JobOffer[];
 }
 
-export default function JobsList({ initialOffers }: JobsListProps) {
+export default function JobsList({ initialOffers = [] }: JobsListProps) {
   const [searchValue, setSearchValue] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'empleo' | 'practicas'>('all');
   const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null);
 
   // Filtrar y buscar ofertas
   const filteredOffers = useMemo(() => {
-    let filtered = initialOffers;
+    let filtered = initialOffers ?? [];
 
     // Filtrar por tipo
     if (activeFilter !== 'all') {
@@ -31,7 +31,7 @@ export default function JobsList({ initialOffers }: JobsListProps) {
           offer.title.toLowerCase().includes(search) ||
           offer.company.toLowerCase().includes(search) ||
           offer.location.toLowerCase().includes(search) ||
-          offer.tags.some((tag) => tag.toLowerCase().includes(search))
+          (offer.tags ?? []).some((tag) => tag.toLowerCase().includes(search))
       );
     }
 

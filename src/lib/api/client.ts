@@ -1,44 +1,132 @@
-import { ApiError } from '@/src/types';
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-export class ApiClientError extends Error {
-  statusCode: number;
-  error?: string;
+// ─── Error class ────────────────────────────────────────────────────────────
 
-  constructor(message: string, statusCode: number, error?: string) {
-    super(message);
+export interface ApiClientErrorOptions {
+  status: number;
+  message: string;
+  code?: string;
+  details?: unknown;
+}
+
+export class ApiClientError extends Error {
+  /** HTTP status code */
+  status: number;
+  /** Short error code from the backend (optional) */
+  code?: string;
+  /** Raw details/issues payload from the backend (optional) */
+  details?: unknown;
+
+  // Legacy alias kept for backwards compatibility
+  get statusCode(): number {
+    return this.status;
+  }
+
+  constructor(opts: ApiClientErrorOptions | string, statusCode?: number, errorCode?: string) {
+    // Support legacy `new ApiClientError(message, status, code)` call-sites
+    if (typeof opts === 'string') {
+      super(opts);
+      this.status    = statusCode ?? 0;
+      this.code      = errorCode;
+    } else {
+      super(opts.message);
+      this.status    = opts.status;
+      this.code      = opts.code;
+      this.details   = opts.details;
+    }
     this.name = 'ApiClientError';
-    this.statusCode = statusCode;
-    this.error = error;
   }
 }
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * Safely extract a human-readable message from any shape the backend may send.
+ * Never throws, never calls .map() on anything.
+ */
+function extractErrorMessage(body: unknown, fallback: string): string {
+  if (typeof body === 'string' && body.length > 0) return body;
+
+  if (body !== null && typeof body === 'object') {
+    const obj = body as Record<string, unknown>;
+
+    // { error: { message, … } }
+    if (obj['error'] !== null && typeof obj['error'] === 'object') {
+      const inner = obj['error'] as Record<string, unknown>;
+      if (typeof inner['message'] === 'string' && inner['message'].length > 0) {
+        return inner['message'];
+      }
+    }
+
+    // { message: "…" }
+    if (typeof obj['message'] === 'string' && obj['message'].length > 0) {
+      return obj['message'];
+    }
+
+    // { error: "…" }  (string)
+    if (typeof obj['error'] === 'string' && obj['error'].length > 0) {
+      return obj['error'];
+    }
+  }
+
+  return fallback;
+}
+
+/**
+ * Safely extract optional fields (code, details) from the backend body.
+ * Never throws.
+ */
+function extractErrorMeta(body: unknown): { code?: string; details?: unknown } {
+  if (body === null || typeof body !== 'object') return {};
+
+  const obj = body as Record<string, unknown>;
+
+  // Prefer nested { error: { code, details } }
+  const inner =
+    obj['error'] !== null && typeof obj['error'] === 'object'
+      ? (obj['error'] as Record<string, unknown>)
+      : obj;
+
+  return {
+    code:    typeof inner['code']    === 'string' ? inner['code']    : undefined,
+    details: inner['details'] !== undefined        ? inner['details'] : undefined,
+  };
+}
+
+// ─── Core ────────────────────────────────────────────────────────────────────
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean>;
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
-  const contentType = response.headers.get('content-type');
-  const isJson = contentType?.includes('application/json');
+  const contentType = response.headers.get('content-type') ?? '';
+  const isJson = contentType.includes('application/json');
 
   if (!response.ok) {
-    if (isJson) {
-      const error: ApiError = await response.json();
-      throw new ApiClientError(
-        error.message || 'Error en la petición',
-        response.status,
-        error.error
-      );
+    const fallback = `Error ${response.status}: ${response.statusText || 'Unknown error'}`;
+    let body: unknown = undefined;
+
+    // Try to parse the error body — never crash on malformed responses
+    try {
+      if (isJson) {
+        body = await response.json();
+      } else {
+        const text = await response.text();
+        body = text.trim() || undefined;
+      }
+    } catch {
+      // Body could not be parsed — body stays undefined
     }
-    throw new ApiClientError(
-      `Error ${response.status}: ${response.statusText}`,
-      response.status
-    );
+
+    const message = extractErrorMessage(body, fallback);
+    const { code, details } = extractErrorMeta(body);
+
+    throw new ApiClientError({ status: response.status, message, code, details });
   }
 
   if (isJson) {
-    return response.json();
+    return response.json() as Promise<T>;
   }
 
   return {} as T;

@@ -33,7 +33,7 @@ export default function StudentProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/student/profile`, {
         credentials: 'include',
       });
@@ -80,7 +80,7 @@ export default function StudentProfilePage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const formData = new FormData();
       formData.append('photo', file);
 
@@ -104,7 +104,7 @@ export default function StudentProfilePage() {
 
   const handleEducationSave = async (education: Education[]) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/student/profile/education`, {
         method: 'PUT',
         credentials: 'include',
@@ -128,7 +128,7 @@ export default function StudentProfilePage() {
 
   const handleExperienceSave = async (experience: Experience[]) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/student/profile/experience`, {
         method: 'PUT',
         credentials: 'include',
@@ -152,7 +152,7 @@ export default function StudentProfilePage() {
 
   const handleCVUpload = async (file: File) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const formData = new FormData();
       formData.append('cv', file);
 
@@ -179,7 +179,7 @@ export default function StudentProfilePage() {
 
   const handleCVDelete = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/student/profile/cv`, {
         method: 'DELETE',
         credentials: 'include',
@@ -198,7 +198,7 @@ export default function StudentProfilePage() {
 
   const handleLanguagesSave = async (languages: Language[]) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/student/profile/languages`, {
         method: 'PUT',
         credentials: 'include',

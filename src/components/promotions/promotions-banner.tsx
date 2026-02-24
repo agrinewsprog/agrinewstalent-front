@@ -12,7 +12,7 @@ interface PromotionsBannerProps {
 }
 
 export function PromotionsBanner({
-  promotions,
+  promotions = [],
   autoRotate = true,
   interval = 5000,
 }: PromotionsBannerProps) {

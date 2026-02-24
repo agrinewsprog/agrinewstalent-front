@@ -20,7 +20,7 @@ interface PendingApprovalsProps {
   onReject: (id: string, type: 'company' | 'offer') => Promise<void>;
 }
 
-export function PendingApprovals({ approvals, onApprove, onReject }: PendingApprovalsProps) {
+export function PendingApprovals({ approvals = [], onApprove, onReject }: PendingApprovalsProps) {
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleApprove = async (approval: PendingApproval) => {
@@ -41,7 +41,8 @@ export function PendingApprovals({ approvals, onApprove, onReject }: PendingAppr
     }
   };
 
-  if (approvals.length === 0) {
+  // Variable undefined: approvals
+  if ((approvals ?? []).length === 0) {
     return (
       <Card>
         <CardBody>
@@ -55,7 +56,7 @@ export function PendingApprovals({ approvals, onApprove, onReject }: PendingAppr
 
   return (
     <div className="space-y-4">
-      {approvals.map((approval) => (
+      {(approvals ?? []).map((approval) => (
         <Card key={approval.id}>
           <CardBody>
             <div className="flex items-start justify-between">

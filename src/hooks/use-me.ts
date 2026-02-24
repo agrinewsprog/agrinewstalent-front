@@ -16,7 +16,7 @@ export function useMe() {
     async function fetchMe() {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
           {
             credentials: 'include',
           }

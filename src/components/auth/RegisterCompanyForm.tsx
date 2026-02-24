@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { z } from 'zod';
+import { useRouter } from 'next/navigation';
 import {
   EnvelopeIcon,
   LockClosedIcon,
@@ -11,6 +12,7 @@ import {
   GlobeAltIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
+import { api } from '@/src/lib/api/client';
 
 // Schema de validación con Zod
 const companySchema = z.object({
@@ -31,6 +33,7 @@ interface RegisterCompanyFormProps {
 }
 
 export default function RegisterCompanyForm({ onSuccess }: RegisterCompanyFormProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState<Partial<CompanyFormData>>({
     email: '',
     password: '',
@@ -81,36 +84,34 @@ export default function RegisterCompanyForm({ onSuccess }: RegisterCompanyFormPr
     setIsSubmitting(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role: 'company',
-          ...result.data,
-        }),
-      });
+      // Normaliza los nombres internos del form a los que espera la API
+      const payload = {
+        role: 'COMPANY',
+        email:       result.data.email,
+        password:    result.data.password,
+        phone:       result.data.telefono,
+        companyName: result.data.razonSocial,
+        taxId:       result.data.cif,
+        country:     result.data.pais,
+        address:     result.data.direccion,
+        postalCode:  result.data.codigoPostal,
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al registrar empresa');
-      }
+      await api.post('/api/auth/register', payload);
 
-      const data = await response.json();
-      console.log('Registro exitoso:', data);
-
-      // Llamar callback de éxito
+      // Redirigir a dashboard de empresa
       if (onSuccess) {
         onSuccess();
       } else {
-        // Redirigir a login
-        window.location.href = '/login';
+        router.push('/intranet/company/dashboard');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al registrar:', error);
-      setSubmitError(error instanceof Error ? error.message : 'Error al registrar empresa');
+      const apiMessage =
+        error?.data?.error?.message ||
+        error?.message ||
+        'Error al registrar empresa';
+      setSubmitError(apiMessage);
     } finally {
       setIsSubmitting(false);
     }

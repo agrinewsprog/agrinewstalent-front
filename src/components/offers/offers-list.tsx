@@ -23,16 +23,16 @@ const offerTypeLabels = {
   'freelance': 'Freelance',
 };
 
-export function OffersList({ offers, onApply, onSave, savedOffers = [] }: OffersListProps) {
+export function OffersList({ offers = [], onApply, onSave, savedOffers = [] }: OffersListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterLocation, setFilterLocation] = useState<string>('all');
 
-  // Extraer ubicaciones únicas
-  const locations = Array.from(new Set(offers.map(o => o.location)));
+  // Extraer ubicaciones únicas - Variable undefined: offers
+  const locations = Array.from(new Set((offers ?? []).map(o => o.location)));
 
   // Filtrar ofertas
-  const filteredOffers = offers.filter(offer => {
+  const filteredOffers = (offers ?? []).filter(offer => {
     const matchesSearch = 
       offer.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       offer.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,7 +80,7 @@ export function OffersList({ offers, onApply, onSave, savedOffers = [] }: Offers
 
       {/* Resultados */}
       <div className="text-sm text-gray-600">
-        Mostrando {filteredOffers.length} de {offers.length} ofertas
+        Mostrando {filteredOffers.length} de {(offers ?? []).length} ofertas
       </div>
 
       {/* Lista de ofertas */}

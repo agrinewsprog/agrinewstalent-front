@@ -19,8 +19,8 @@ interface StudentProgramDetailProps {
 
 export function StudentProgramDetail({ 
   programId, 
-  offers, 
-  companies 
+  offers = [], 
+  companies = [] 
 }: StudentProgramDetailProps) {
   const router = useRouter();
   const { success, error: showError } = useToast();
@@ -71,7 +71,7 @@ export function StudentProgramDetail({
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Ofertas ({offers.length})
+            Ofertas ({(offers ?? []).length})
           </button>
           <button
             onClick={() => setActiveTab('companies')}
@@ -81,7 +81,7 @@ export function StudentProgramDetail({
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Empresas ({companies.length})
+            Empresas ({(companies ?? []).length})
           </button>
         </nav>
       </div>
@@ -106,7 +106,7 @@ export function StudentProgramDetail({
               </CardBody>
             </Card>
           ) : (
-            companies.map((company) => (
+            (companies ?? []).map((company) => (
               <Card key={company.id}>
                 <CardBody>
                   <h3 className="text-lg font-semibold text-gray-900">

@@ -11,7 +11,7 @@ interface CoursesListProps {
 }
 
 export function CoursesList({
-  enrollments,
+  enrollments = [],
   role,
   showProgress = true,
 }: CoursesListProps) {
@@ -44,7 +44,7 @@ export function CoursesList({
     return 'bg-gray-400';
   };
 
-  if (enrollments.length === 0) {
+  if ((enrollments ?? []).length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
         <div className="text-6xl mb-4">📚</div>
@@ -60,7 +60,7 @@ export function CoursesList({
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {enrollments.map((enrollment) => {
+      {(enrollments ?? []).map((enrollment) => {
         const course = enrollment.course;
         if (!course) return null;
 

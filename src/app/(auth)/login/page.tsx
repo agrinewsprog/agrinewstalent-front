@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { EnvelopeIcon, LockClosedIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { api, ApiClientError } from '@/src/lib/api/client';
 
 // Schema de validación con Zod
 const loginSchema = z.object({
@@ -58,31 +59,71 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Importante para recibir cookies
-        body: JSON.stringify(result.data),
-      });
+      // 1) Login — recibimos el token en la respuesta
+      const loginResponse = await api.post<{
+        token?: string;
+        accessToken?: string;
+        user?: { role?: string };
+        role?: string;
+      }>('/api/auth/login', result.data);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al iniciar sesión');
+      // Extraer el token (soporta 'token' y 'accessToken')
+      const token = loginResponse?.token ?? loginResponse?.accessToken ?? '';
+
+      // Si el login ya devuelve el rol, úsalo directamente sin llamar a /me
+      const roleFromLogin =
+        loginResponse?.user?.role ?? loginResponse?.role ?? '';
+
+      let role = roleFromLogin;
+
+      // 2) Si no tenemos rol aún, llamar a /me pasando el token como Bearer
+      if (!role) {
+        try {
+          const meData = await api.get<{ user?: { role?: string }; role?: string }>(
+            '/api/auth/me',
+            token
+              ? { headers: { Authorization: `Bearer ${token}` } }
+              : undefined
+          );
+          role = meData?.user?.role ?? meData?.role ?? '';
+        } catch (meErr) {
+          const hint =
+            meErr instanceof ApiClientError && meErr.status === 401
+              ? 'Sesión no establecida. Verifica la configuración de cookies/CORS.'
+              : 'Login correcto pero no se pudo verificar la sesión. Inténtalo de nuevo.';
+          throw new Error(hint);
+        }
       }
 
-      const data = await response.json();
-      console.log('Login exitoso:', data);
+      // 3) Guardar el token en una cookie httpOnly para que el servidor
+      //    pueda leerlo en getSession() al renderizar el layout de intranet
+      if (token) {
+        await fetch('/api/auth/set-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+      }
 
-      // La cookie httpOnly se establece automáticamente
-      // Redirigir a intranet (el middleware redirigirá al dashboard correcto según el rol)
-      router.push('/intranet');
+      // 4) Redirigir al dashboard según el rol (acepta mayúsculas y minúsculas)
+      const dashboardByRole: Record<string, string> = {
+        COMPANY:     '/intranet/company/dashboard',
+        STUDENT:     '/intranet/student/dashboard',
+        UNIVERSITY:  '/intranet/university/dashboard',
+        SUPER_ADMIN: '/intranet/admin/dashboard',
+        company:     '/intranet/company/dashboard',
+        student:     '/intranet/student/dashboard',
+        university:  '/intranet/university/dashboard',
+        super_admin: '/intranet/admin/dashboard',
+        admin:       '/intranet/admin/dashboard',
+        ADMIN:       '/intranet/admin/dashboard',
+      };
+
+      router.push(dashboardByRole[role] ?? '/intranet');
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       setSubmitError(
-        error instanceof Error ? error.message : 'Credenciales incorrectas. Intenta de nuevo.'
+        error instanceof Error ? error.message : 'Credenciales incorrectas. Inténtalo de nuevo.'
       );
     } finally {
       setIsSubmitting(false);

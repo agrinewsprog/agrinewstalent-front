@@ -25,10 +25,11 @@ const statusVariants: Record<string, 'default' | 'success' | 'warning' | 'danger
   closed: 'default',
 };
 
-export function ProgramsList({ programs, role, onJoin, onApprove }: ProgramsListProps) {
+export function ProgramsList({ programs = [], role, onJoin, onApprove }: ProgramsListProps) {
+  // Variable undefined: programs
   return (
     <div className="grid grid-cols-1 gap-4">
-      {programs.length === 0 ? (
+      {(programs ?? []).length === 0 ? (
         <Card>
           <CardBody>
             <p className="text-center text-gray-600 py-8">
@@ -37,7 +38,7 @@ export function ProgramsList({ programs, role, onJoin, onApprove }: ProgramsList
           </CardBody>
         </Card>
       ) : (
-        programs.map((program) => (
+        (programs ?? []).map((program) => (
           <Card key={program.id}>
             <CardBody>
               <div className="flex items-start justify-between">

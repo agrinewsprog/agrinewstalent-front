@@ -26,7 +26,7 @@ export default function CompanyCandidatesPage() {
 
   const fetchCandidates = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/company/candidates`, {
         credentials: 'include',
       });
@@ -144,7 +144,7 @@ export default function CompanyCandidatesPage() {
     if (!messageText.trim() || !selectedCandidate) return;
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const response = await fetch(`${apiUrl}/company/candidates/${selectedCandidate.id}/message`, {
         method: 'POST',
         credentials: 'include',

@@ -8,7 +8,7 @@ export interface SelectProps
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, options, className = '', ...props }, ref) => {
+  ({ label, error, options = [], className = '', ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (

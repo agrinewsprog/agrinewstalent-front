@@ -52,13 +52,13 @@ export function Sidebar({ user, navigation }: SidebarProps) {
           <div className="flex-shrink-0">
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-blue-600 font-medium">
-                {user.name.charAt(0).toUpperCase()}
+                {(user.name ?? user.email ?? '?').charAt(0).toUpperCase()}
               </span>
             </div>
           </div>
           <div className="ml-3 flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">
-              {user.name}
+              {user.name ?? user.email ?? 'Usuario'}
             </p>
             <p className="text-xs text-gray-500 truncate">{user.email}</p>
           </div>

@@ -20,10 +20,10 @@ const offerTypeLabels = {
   'freelance': 'Freelance',
 };
 
-export function ProgramOffersList({ offers, role, onApply, onRemove }: ProgramOffersListProps) {
+export function ProgramOffersList({ offers = [], role, onApply, onRemove }: ProgramOffersListProps) {
   return (
     <div className="grid grid-cols-1 gap-4">
-      {offers.length === 0 ? (
+      {(offers ?? []).length === 0 ? (
         <Card>
           <CardBody>
             <p className="text-center text-gray-600 py-8">
@@ -32,7 +32,7 @@ export function ProgramOffersList({ offers, role, onApply, onRemove }: ProgramOf
           </CardBody>
         </Card>
       ) : (
-        offers.map((offer) => (
+        (offers ?? []).map((offer) => (
           <Card key={offer.id}>
             <CardBody>
               <div className="flex items-start justify-between">

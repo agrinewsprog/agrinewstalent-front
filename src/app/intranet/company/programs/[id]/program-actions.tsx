@@ -15,7 +15,7 @@ interface CompanyProgramActionsProps {
   myOffers: Offer[];
 }
 
-export function CompanyProgramActions({ programId, myOffers }: CompanyProgramActionsProps) {
+export function CompanyProgramActions({ programId, myOffers = [] }: CompanyProgramActionsProps) {
   const router = useRouter();
   const { success, error: showError } = useToast();
   const [selectedOfferId, setSelectedOfferId] = useState<string>('');
@@ -45,7 +45,7 @@ export function CompanyProgramActions({ programId, myOffers }: CompanyProgramAct
     }
   };
 
-  const publishedOffers = myOffers.filter(o => o.status === 'published');
+  const publishedOffers = (myOffers ?? []).filter(o => o.status === 'published');
 
   return (
     <div className="space-y-6">
@@ -77,7 +77,7 @@ export function CompanyProgramActions({ programId, myOffers }: CompanyProgramAct
                 onChange={(e) => setSelectedOfferId(e.target.value)}
                 options={[
                   { value: '', label: 'Selecciona...' },
-                  ...publishedOffers.map((offer) => ({
+                  ...(publishedOffers ?? []).map((offer) => ({
                     value: offer.id,
                     label: offer.title,
                   })),
@@ -102,7 +102,7 @@ export function CompanyProgramActions({ programId, myOffers }: CompanyProgramAct
         </CardHeader>
         <CardBody>
           <div className="space-y-3">
-            {myOffers
+            {(myOffers ?? [])
               .filter(o => o.programId === programId)
               .map((offer) => (
                 <div
@@ -116,7 +116,7 @@ export function CompanyProgramActions({ programId, myOffers }: CompanyProgramAct
                   <Badge variant="success">En programa</Badge>
                 </div>
               ))}
-            {myOffers.filter(o => o.programId === programId).length === 0 && (
+            {(myOffers ?? []).filter(o => o.programId === programId).length === 0 && (
               <p className="text-center text-gray-600 py-8">
                 No tienes ofertas en este programa
               </p>

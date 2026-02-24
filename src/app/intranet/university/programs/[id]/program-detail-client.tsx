@@ -17,8 +17,8 @@ interface ProgramDetailClientProps {
 
 export function ProgramDetailClient({ 
   programId, 
-  initialOffers, 
-  initialCompanies 
+  initialOffers = [], 
+  initialCompanies = [] 
 }: ProgramDetailClientProps) {
   const router = useRouter();
   const { success, error: showError } = useToast();
@@ -59,7 +59,7 @@ export function ProgramDetailClient({
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Ofertas ({initialOffers.length})
+            Ofertas ({(initialOffers ?? []).length})
           </button>
           <button
             onClick={() => setActiveTab('companies')}
@@ -69,7 +69,7 @@ export function ProgramDetailClient({
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Empresas ({initialCompanies.length})
+            Empresas ({(initialCompanies ?? []).length})
           </button>
         </nav>
       </div>
@@ -77,7 +77,7 @@ export function ProgramDetailClient({
       {/* Content */}
       {activeTab === 'offers' && (
         <div className="space-y-4">
-          {initialOffers.length === 0 ? (
+          {(initialOffers ?? []).length === 0 ? (
             <Card>
               <CardBody>
                 <p className="text-center text-gray-600 py-8">
@@ -86,7 +86,7 @@ export function ProgramDetailClient({
               </CardBody>
             </Card>
           ) : (
-            initialOffers.map((offer) => (
+            (initialOffers ?? []).map((offer) => (
               <Card key={offer.id}>
                 <CardBody>
                   <div className="flex items-start justify-between">
@@ -123,7 +123,7 @@ export function ProgramDetailClient({
 
       {activeTab === 'companies' && (
         <div className="space-y-4">
-          {initialCompanies.length === 0 ? (
+          {(initialCompanies ?? []).length === 0 ? (
             <Card>
               <CardBody>
                 <p className="text-center text-gray-600 py-8">
@@ -132,7 +132,7 @@ export function ProgramDetailClient({
               </CardBody>
             </Card>
           ) : (
-            initialCompanies.map((company) => (
+            (initialCompanies ?? []).map((company) => (
               <Card key={company.id}>
                 <CardBody>
                   <div className="flex items-start justify-between">

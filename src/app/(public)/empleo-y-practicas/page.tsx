@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 async function getOffers(): Promise<JobOffer[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     const res = await fetch(`${apiUrl}/offers`, {
       cache: 'no-store', // Para obtener datos frescos
       // Puedes usar 'force-cache' o revalidate para ISR

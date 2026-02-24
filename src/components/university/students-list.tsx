@@ -10,10 +10,11 @@ interface StudentsListProps {
   students: Student[];
 }
 
-export function StudentsList({ students }: StudentsListProps) {
+export function StudentsList({ students = [] }: StudentsListProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredStudents = students.filter((student) => {
+  // Variable undefined: students
+  const filteredStudents = (students ?? []).filter((student) => {
     const search = searchTerm.toLowerCase();
     return (
       student.name.toLowerCase().includes(search) ||
@@ -31,7 +32,7 @@ export function StudentsList({ students }: StudentsListProps) {
       />
 
       <div className="text-sm text-gray-600">
-        Mostrando {filteredStudents.length} de {students.length} estudiantes
+        Mostrando {filteredStudents.length} de {(students ?? []).length} estudiantes
       </div>
 
       <div className="grid grid-cols-1 gap-4">
