@@ -51,12 +51,13 @@ const statusVariants: Record<string, 'default' | 'success' | 'warning' | 'danger
 export default async function StudentProgramDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const [program, offers, companies] = await Promise.all([
-    getProgram(params.id),
-    getProgramOffers(params.id),
-    getProgramCompanies(params.id),
+    getProgram(id),
+    getProgramOffers(id),
+    getProgramCompanies(id),
   ]);
 
   if (!program) {

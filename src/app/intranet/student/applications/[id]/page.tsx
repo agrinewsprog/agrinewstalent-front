@@ -8,12 +8,19 @@ import { ApplicationTimeline } from '@/src/components/applications/application-t
 
 async function getApplication(id: string): Promise<Application | null> {
   try {
-    const response = await api.get<{ data: Application }>(`/applications/${id}`);
-    return response.data;
+    const response = await api.get<any>(`/applications/${id}`);
+    return (response.application ?? response.data ?? response) as Application;
   } catch (error) {
     console.error('Error fetching application:', error);
     return null;
   }
+}
+
+function formatDate(value: string | null | undefined, opts?: Intl.DateTimeFormatOptions): string {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('es-ES', opts ?? { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 const statusLabels: Record<Application['status'], string> = {
@@ -35,9 +42,10 @@ const statusVariants: Record<Application['status'], 'default' | 'success' | 'war
 export default async function ApplicationDetail({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const application = await getApplication(params.id);
+  const { id } = await params;
+  const application = await getApplication(id);
 
   if (!application) {
     notFound();
@@ -75,16 +83,8 @@ export default async function ApplicationDetail({
             <div>
               <h2 className="text-lg font-semibold mb-2">Información de la aplicación</h2>
               <div className="text-sm text-gray-600 space-y-1">
-                <p>
-                  Enviada: {new Date(application.createdAt).toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
-                <p>
-                  Última actualización: {new Date(application.updatedAt).toLocaleDateString('es-ES')}
-                </p>
+                <p>Enviada: {formatDate(application.createdAt)}</p>
+                <p>Última actualización: {formatDate(application.updatedAt)}</p>
               </div>
             </div>
 
@@ -108,6 +108,17 @@ export default async function ApplicationDetail({
                 <div className="mt-3 text-sm text-gray-600">
                   <p>📍 {application.offer.location}</p>
                   {application.offer.salary && <p>💰 {application.offer.salary}</p>}
+                </div>
+                <div className="mt-4">
+                  <Link
+                    href={`/intranet/student/offers/${application.offer.id ?? application.offerId}`}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600 hover:text-green-700 border border-green-600 hover:border-green-700 rounded-lg px-4 py-2 transition-colors"
+                  >
+                    Ver oferta completa
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
                 </div>
               </div>
             )}

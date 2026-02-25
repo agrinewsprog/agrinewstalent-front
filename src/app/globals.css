@@ -3,6 +3,7 @@
 @theme {
   --color-green-brand: #22c55e;
   --color-green-dark: #16a34a;
+  --shadow-xl: 0 9px 32px 11px #00000024, 0 8px 10px -6px #00000000;
 }
 
 /* Base styles */

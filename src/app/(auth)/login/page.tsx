@@ -1,12 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
-import { EnvelopeIcon, LockClosedIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { api, ApiClientError } from '@/src/lib/api/client';
 
-// Schema de validación con Zod
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(1, 'La contraseña es obligatoria'),
@@ -16,23 +14,16 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState<Partial<LoginFormData>>({
-    email: '',
-    password: '',
-  });
+  const [activeTab, setActiveTab] = useState<'estudiante' | 'empresa'>('empresa');
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState<Partial<LoginFormData>>({ email: '', password: '' });
   const [errors, setErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string>('');
+  const [submitError, setSubmitError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Limpiar error del campo cuando el usuario empieza a escribir
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name as keyof LoginFormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -43,23 +34,19 @@ export default function LoginPage() {
     setErrors({});
     setSubmitError('');
 
-    // Validar con Zod
     const result = loginSchema.safeParse(formData);
-
     if (!result.success) {
       const fieldErrors: Partial<Record<keyof LoginFormData, string>> = {};
       result.error.issues.forEach((err) => {
-        const path = err.path[0] as keyof LoginFormData;
-        fieldErrors[path] = err.message;
+        const p = err.path[0] as keyof LoginFormData;
+        fieldErrors[p] = err.message;
       });
       setErrors(fieldErrors);
       return;
     }
 
     setIsSubmitting(true);
-
     try {
-      // 1) Login — recibimos el token en la respuesta
       const loginResponse = await api.post<{
         token?: string;
         accessToken?: string;
@@ -67,23 +54,15 @@ export default function LoginPage() {
         role?: string;
       }>('/api/auth/login', result.data);
 
-      // Extraer el token (soporta 'token' y 'accessToken')
       const token = loginResponse?.token ?? loginResponse?.accessToken ?? '';
-
-      // Si el login ya devuelve el rol, úsalo directamente sin llamar a /me
-      const roleFromLogin =
-        loginResponse?.user?.role ?? loginResponse?.role ?? '';
-
+      const roleFromLogin = loginResponse?.user?.role ?? loginResponse?.role ?? '';
       let role = roleFromLogin;
 
-      // 2) Si no tenemos rol aún, llamar a /me pasando el token como Bearer
       if (!role) {
         try {
           const meData = await api.get<{ user?: { role?: string }; role?: string }>(
             '/api/auth/me',
-            token
-              ? { headers: { Authorization: `Bearer ${token}` } }
-              : undefined
+            token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
           );
           role = meData?.user?.role ?? meData?.role ?? '';
         } catch (meErr) {
@@ -95,8 +74,6 @@ export default function LoginPage() {
         }
       }
 
-      // 3) Guardar el token en una cookie httpOnly para que el servidor
-      //    pueda leerlo en getSession() al renderizar el layout de intranet
       if (token) {
         await fetch('/api/auth/set-session', {
           method: 'POST',
@@ -105,7 +82,6 @@ export default function LoginPage() {
         });
       }
 
-      // 4) Redirigir al dashboard según el rol (acepta mayúsculas y minúsculas)
       const dashboardByRole: Record<string, string> = {
         COMPANY:     '/intranet/company/dashboard',
         STUDENT:     '/intranet/student/dashboard',
@@ -123,7 +99,7 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       setSubmitError(
-        error instanceof Error ? error.message : 'Credenciales incorrectas. Inténtalo de nuevo.'
+        error instanceof Error ? error.message : 'Credenciales incorrectas. Inténtalo de nuevo.',
       );
     } finally {
       setIsSubmitting(false);
@@ -131,132 +107,151 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="bg-green-600 rounded-full p-3">
-              <svg
-                className="h-12 w-12 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Iniciar sesión</h1>
-          <p className="text-lg text-gray-600">Accede a tu cuenta de AgriNews Talent</p>
-        </div>
+    <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
+      {/* Ondas decorativas verdes */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg
+          viewBox="0 0 900 600"
+          preserveAspectRatio="xMidYMid slice"
+          className="absolute bottom-0 left-0 w-full h-full"
+        >
+          <path
+            d="M0 420 C150 300 350 510 520 370 S760 210 900 330 L900 600 L0 600 Z"
+            fill="#bbf7d0"
+          />
+          <path
+            d="M0 460 C200 340 420 530 620 420 S820 300 900 390 L900 600 L0 600 Z"
+            fill="#86efac"
+          />
+          <path
+            d="M0 510 C250 400 430 570 680 470 S840 370 900 450 L900 600 L0 600 Z"
+            fill="#4ade80"
+            opacity="0.65"
+          />
+        </svg>
+        <svg
+          viewBox="0 0 700 500"
+          preserveAspectRatio="xMidYMid slice"
+          className="absolute -top-16 -right-16 w-1/2 h-1/2 opacity-40"
+        >
+          <ellipse cx="500" cy="150" rx="400" ry="260" fill="#dcfce7" />
+        </svg>
+      </div>
 
-        {/* Form Container */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-sm mx-4">
+        <div className="bg-white rounded-2xl shadow-xl px-8 pt-7 pb-8">
+
+          <h1 className="text-2xl font-bold text-center mb-4">Iniciar sesión</h1>
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <p className="text-center text-sm font-semibold text-gray-700 mb-1">
+              Rellena tus datos
+            </p>
+
             {submitError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
                 {submitError}
               </div>
             )}
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="tu@email.com"
-                />
-              </div>
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email"
+                className={`block w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition-colors placeholder-gray-400 ${
+                  errors.email ? 'border-red-400' : 'border-gray-300'
+                }`}
+              />
+              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Contraseña
-              </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-5 w-5 text-gray-400" />
-                </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
+                  placeholder="Contraseña"
+                  className={`block w-full px-4 py-2.5 pr-10 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition-colors placeholder-gray-400 ${
+                    errors.password ? 'border-red-400' : 'border-gray-300'
                   }`}
-                  placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  )}
+                </button>
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              {errors.password && (
+                <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+              )}
             </div>
 
-            {/* Forgot Password Link */}
-            <div className="flex items-center justify-end">
+            {/* Forgot password */}
+            <div className="text-right">
               <a
                 href="/recuperar-password"
-                className="text-sm text-green-600 hover:text-green-700 font-medium"
+                className="text-xs text-gray-500 hover:text-green-600 transition-colors"
               >
-                ¿Olvidaste tu contraseña?
+                ¿Has olvidado tu contraseña?
               </a>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+              className={`w-full py-2.5 rounded-full text-sm font-semibold transition-all shadow-sm ${
+                isSubmitting
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
             >
-              {isSubmitting ? (
-                'Iniciando sesión...'
-              ) : (
-                <>
-                  Iniciar sesión
-                  <ArrowRightIcon className="h-5 w-5" />
-                </>
-              )}
+              {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </button>
           </form>
 
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              ¿No tienes cuenta?{' '}
-              <a href="/registro" className="text-green-600 hover:text-green-700 font-medium">
-                Regístrate aquí
-              </a>
-            </p>
-          </div>
-        </div>
-
-        {/* Additional Info */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-600">
-            Al iniciar sesión, aceptas nuestros{' '}
-            <a href="/terminos" className="text-green-600 hover:text-green-700">
-              Términos y Condiciones
+          {/* Registro */}
+          <p className="mt-5 text-center text-xs text-gray-500">
+            ¿No tienes cuenta?{' '}
+            <a href="/registro" className="text-green-600 hover:text-green-700 font-semibold">
+              Regístrate
             </a>
           </p>
         </div>

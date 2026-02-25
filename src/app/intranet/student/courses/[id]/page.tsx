@@ -49,11 +49,12 @@ async function getCourse(courseId: string): Promise<Course | null> {
 export default async function StudentCourseDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const [enrollment, course] = await Promise.all([
-    getEnrollment(params.id),
-    getCourse(params.id),
+    getEnrollment(id),
+    getCourse(id),
   ]);
 
   if (!enrollment || !course) {

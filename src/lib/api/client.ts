@@ -138,7 +138,12 @@ export async function apiClient<T>(
 ): Promise<T> {
   const { params, ...fetchOptions } = options;
 
-  let url = `${API_URL}${endpoint}`;
+  // Añadir /api como prefijo base si el endpoint no lo incluye ya
+  const normalizedEndpoint = endpoint.startsWith('/api/')
+    ? endpoint
+    : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+
+  let url = `${API_URL}${normalizedEndpoint}`;
 
   // Add query params si existen
   if (params) {

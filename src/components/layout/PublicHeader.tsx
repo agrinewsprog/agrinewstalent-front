@@ -4,17 +4,108 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 export function PublicHeader() {
-  const [language, setLanguage] = useState('es');
+  const [language, setLanguage] = useState('ES');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const menuItems = [
-    { label: 'Empleo y prácticas', href: '/empleos' },
+    { label: 'Empleo y prácticas', href: '/empleo-y-practicas' },
     { label: 'Formación', href: '/formacion' },
     { label: 'Eventos', href: '/eventos' },
     { label: 'Empresas', href: '/empresas' },
     { label: 'Universidades', href: '/universidades' },
     { label: 'Blog', href: '/blog' },
   ];
+
+  return (
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link href="/" className="shrink-0">
+            <img src="/logo.png" alt="AgriNews Talent" className="h-10 w-auto" />
+          </Link>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex items-center space-x-0.5">
+            {menuItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors hover:bg-green-50 rounded-md"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right side */}
+          <div className="hidden lg:flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-sm text-gray-600">
+              <span>Para el idioma:</span>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="font-semibold text-gray-800 border-0 bg-transparent focus:outline-none cursor-pointer"
+              >
+                <option value="ES">ES</option>
+                <option value="EN">EN</option>
+                <option value="PT">PT</option>
+              </select>
+            </div>
+            <Link
+              href="/login"
+              className="inline-flex items-center px-5 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors font-semibold text-sm shadow-sm"
+            >
+              Iniciar sesión
+            </Link>
+          </div>
+
+          {/* Mobile button */}
+          <button
+            className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menú"
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden py-3 border-t border-gray-100 space-y-1">
+            {menuItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 font-medium text-sm"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <div className="pt-2 border-t border-gray-100">
+              <Link
+                href="/login"
+                className="block text-center mx-4 py-2.5 bg-green-600 text-white rounded-full font-semibold text-sm"
+              >
+                Iniciar sesión
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
+    </header>
+  );
+}
+
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">

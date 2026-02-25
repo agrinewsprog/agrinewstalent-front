@@ -1,57 +1,111 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback } from 'react';
 import { api } from '@/src/lib/api/client';
 import { Offer } from '@/src/types';
 import { OffersList } from '@/src/components/offers/offers-list';
-import { useToast } from '@/src/hooks/use-toast';
 
 interface OffersPageClientProps {
   initialOffers: Offer[];
+  initialAppliedIds?: string[];
+  initialSavedIds?: string[];
 }
 
-export function OffersPageClient({ initialOffers }: OffersPageClientProps) {
-  const router = useRouter();
-  const { success, error: showError } = useToast();
-  const [savedOffers, setSavedOffers] = useState<string[]>([]);
+// ── Notificación inline simple ────────────────────────────────────────────────
+type NotifType = 'success' | 'error';
+interface Notif { id: number; msg: string; type: NotifType }
+
+function useNotif() {
+  const [notifs, setNotifs] = useState<Notif[]>([]);
+  let counter = 0;
+
+  const show = useCallback((msg: string, type: NotifType) => {
+    const id = ++counter;
+    setNotifs(p => [...p, { id, msg, type }]);
+    setTimeout(() => setNotifs(p => p.filter(n => n.id !== id)), 4000);
+  }, []);
+
+  return {
+    notifs,
+    success: (msg: string) => show(msg, 'success'),
+    error: (msg: string) => show(msg, 'error'),
+  };
+}
+
+function NotifBar({ notifs }: { notifs: Notif[] }) {
+  if (!notifs.length) return null;
+  return (
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
+      {notifs.map(n => (
+        <div
+          key={n.id}
+          className={`rounded-xl px-4 py-3 text-sm font-medium shadow-lg text-white transition-all ${
+            n.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          }`}
+        >
+          {n.type === 'success' ? '✓ ' : '✗ '}{n.msg}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+export function OffersPageClient({ initialOffers, initialAppliedIds = [], initialSavedIds = [] }: OffersPageClientProps) {
+  const { notifs, success, error: showError } = useNotif();
+  const [savedOffers, setSavedOffers] = useState<string[]>(initialSavedIds);
+  const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set(initialAppliedIds));
+  const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const handleApply = async (offerId: string) => {
+    if (applyingId) return;
+    setApplyingId(offerId);
     try {
-      await api.post(`/applications`, { offerId });
+      await api.post('/applications', { offerId });
+      setAppliedIds(p => new Set([...p, offerId]));
       success('¡Aplicación enviada correctamente!');
-      router.push('/intranet/student/applications');
-    } catch (err) {
-      showError('Error al enviar la aplicación');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al enviar la aplicación';
+      showError(msg);
       console.error(err);
+    } finally {
+      setApplyingId(null);
     }
   };
 
   const handleSave = async (offerId: string) => {
+    if (savingId) return;
+    setSavingId(offerId);
     try {
       if (savedOffers.includes(offerId)) {
-        // Unsave
         await api.delete(`/saved-offers/${offerId}`);
-        setSavedOffers((prev) => prev.filter((id) => id !== offerId));
+        setSavedOffers(p => p.filter(id => id !== offerId));
         success('Oferta eliminada de guardadas');
       } else {
-        // Save
-        await api.post(`/saved-offers`, { offerId });
-        setSavedOffers((prev) => [...prev, offerId]);
-        success('Oferta guardada correctamente');
+        await api.post('/saved-offers', { offerId });
+        setSavedOffers(p => [...p, offerId]);
+        success('Oferta guardada');
       }
-    } catch (err) {
-      showError('Error al guardar la oferta');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al guardar la oferta';
+      showError(msg);
       console.error(err);
+    } finally {
+      setSavingId(null);
     }
   };
 
   return (
-    <OffersList
-      offers={initialOffers}
-      onApply={handleApply}
-      onSave={handleSave}
-      savedOffers={savedOffers}
-    />
+    <>
+      <NotifBar notifs={notifs} />
+      <OffersList
+        offers={initialOffers}
+        onApply={handleApply}
+        onSave={handleSave}
+        savedOffers={savedOffers}
+        appliedOffers={[...appliedIds]}
+      />
+    </>
   );
 }

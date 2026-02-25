@@ -36,9 +36,10 @@ const statusVariants: Record<Application['status'], 'default' | 'success' | 'war
 export default async function CompanyApplicationDetail({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const application = await getApplication(params.id);
+  const { id } = await params;
+  const application = await getApplication(id);
 
   if (!application) {
     notFound();

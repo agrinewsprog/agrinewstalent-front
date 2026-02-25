@@ -1,89 +1,59 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
-interface CTAButton {
-  text: string;
-  href: string;
-  variant?: 'primary' | 'secondary' | 'outline';
-}
+const steps = [
+  {
+    href: '/registro?tipo=empresa',
+    label: 'Publicar vacantes',
+    icon: (
+      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M12 4v16m8-8H4" />
+      </svg>
+    ),
+  },
+  {
+    href: '/login',
+    label: 'Ver mis vacantes',
+    icon: (
+      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+    ),
+  },
+  {
+    href: '/candidatos',
+    label: 'Ver candidatos',
+    icon: (
+      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+  },
+];
 
-interface CTASectionProps {
-  title: string;
-  subtitle?: string;
-  buttons: CTAButton[];
-  backgroundColor?: 'gray' | 'green' | 'white';
-}
-
-export function CTASection({
-  title,
-  subtitle,
-  buttons,
-  backgroundColor = 'gray',
-}: CTASectionProps) {
-  const bgColors = {
-    gray: 'bg-gray-100',
-    green: 'bg-green-600 text-white',
-    white: 'bg-white',
-  };
-
-  const titleColors = {
-    gray: 'text-gray-900',
-    green: 'text-white',
-    white: 'text-gray-900',
-  };
-
-  const subtitleColors = {
-    gray: 'text-gray-600',
-    green: 'text-green-100',
-    white: 'text-gray-600',
-  };
-
-  const getButtonClasses = (variant: CTAButton['variant'] = 'primary') => {
-    if (backgroundColor === 'green') {
-      // When background is green
-      if (variant === 'primary') {
-        return 'bg-white text-green-700 hover:bg-green-50';
-      }
-      if (variant === 'outline') {
-        return 'bg-transparent text-white border-2 border-white hover:bg-white hover:text-green-700';
-      }
-      return 'bg-green-700 text-white hover:bg-green-800';
-    }
-
-    // Default colors for gray/white backgrounds
-    if (variant === 'primary') {
-      return 'bg-green-600 text-white hover:bg-green-700';
-    }
-    if (variant === 'outline') {
-      return 'bg-white text-green-600 border-2 border-green-600 hover:bg-green-50';
-    }
-    return 'bg-green-700 text-white hover:bg-green-800';
-  };
-
+export function CTASection() {
   return (
-    <section className={`py-16 sm:py-20 ${bgColors[backgroundColor]}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-10">
-          <h2
-            className={`text-3xl sm:text-4xl font-bold mb-4 ${titleColors[backgroundColor]}`}
-          >
-            {title}
-          </h2>
-          {subtitle && (
-            <p
-              className={`text-lg sm:text-xl ${subtitleColors[backgroundColor]}`}
-            >
-              {subtitle}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
-          {buttons.map((button, index) => (
+    <section className="py-14 bg-gray-50 border-y border-gray-200">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p className="text-gray-500 text-sm font-semibold uppercase tracking-widest mb-2">
+          Da el{' '}
+          <span className="text-green-600">primer paso</span> en tu proceso de selección
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-8">
+          {steps.map((step) => (
             <Link
-              key={index}
-              href={button.href}
-              className={`inline-flex items-center justify-center px-6 py-3 rounded-lg transition-colors font-semibold text-base ${getButtonClasses(button.variant)}`}
+              key={step.label}
+              href={step.href}
+              className="flex flex-col items-center gap-3 group"
             >
-              {button.text}
+              <div className="w-16 h-16 rounded-full bg-green-600 text-white flex items-center justify-center shadow-md group-hover:bg-green-700 transition-colors">
+                {step.icon}
+              </div>
+              <span className="text-sm font-semibold text-gray-700 group-hover:text-green-600 transition-colors">
+                {step.label}
+              </span>
             </Link>
           ))}
         </div>
@@ -91,3 +61,5 @@ export function CTASection({
     </section>
   );
 }
+
+

@@ -3,11 +3,27 @@ import { Application } from '@/src/types';
 import Link from 'next/link';
 import { api } from '@/src/lib/api/client';
 import { ApplicationsList } from '@/src/components/applications/applications-list';
+import { cookies } from 'next/headers';
+
+async function getAuthHeader(): Promise<Record<string, string>> {
+  try {
+    const cookieStore = await cookies();
+    const token =
+      cookieStore.get('access_token')?.value ??
+      cookieStore.get('token')?.value;
+    if (token) return { Authorization: `Bearer ${token}` };
+  } catch {}
+  return {};
+}
 
 async function getApplications(): Promise<Application[]> {
   try {
-    const response = await api.get<{ data: Application[] }>('/applications/my');
-    return response.data;
+    const authHeader = await getAuthHeader();
+    const response = await api.get<{ applications?: Application[]; data?: Application[] }>(
+      '/applications/students/me',
+      { headers: authHeader }
+    );
+    return response.applications ?? response.data ?? [];
   } catch (error) {
     console.error('Error fetching applications:', error);
     return [];
@@ -20,7 +36,7 @@ export default async function StudentApplications() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Mis Aplicaciones</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Mis Ofertas</h1>
         <p className="text-gray-600 mt-2">
           Seguimiento de tus postulaciones
         </p>

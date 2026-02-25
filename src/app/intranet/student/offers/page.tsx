@@ -3,12 +3,30 @@ import { Offer, CourseEnrollment } from '@/src/types';
 import { Card, CardBody } from '@/src/components/ui/card';
 import { OffersPageClient } from './page.client';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
-// Ejemplo de llamada a API desde server component
+// Lee el token de las cookies para pasarlo en SSR
+async function getAuthHeader(): Promise<Record<string, string>> {
+  try {
+    const cookieStore = await cookies();
+    const token =
+      cookieStore.get('access_token')?.value ??
+      cookieStore.get('token')?.value;
+    if (token) return { Authorization: `Bearer ${token}` };
+  } catch {}
+  return {};
+}
+
 async function getOffers(): Promise<Offer[]> {
   try {
-    const response = await api.get<{ data: Offer[] }>('/offers');
-    return response.data;
+    const authHeader = await getAuthHeader();
+    const response = await api.get<{ data?: Offer[]; offers?: Offer[] } | Offer[]>('/offers', {
+      headers: authHeader,
+    });
+    // La API puede devolver: array directo, { data: [...] } o { offers: [...] }
+    if (Array.isArray(response)) return response;
+    const wrapped = response as { data?: Offer[]; offers?: Offer[] };
+    return wrapped.data ?? wrapped.offers ?? [];
   } catch (error) {
     console.error('Error fetching offers:', error);
     return [];
@@ -17,27 +35,67 @@ async function getOffers(): Promise<Offer[]> {
 
 async function getEnrollments(): Promise<CourseEnrollment[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/enrollments`, {
+    const authHeader = await getAuthHeader();
+    const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const response = await fetch(`${API}/api/courses/enrollments`, {
       cache: 'no-store',
-      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...authHeader },
     });
-
-    if (!response.ok) {
-      return [];
-    }
-
+    if (!response.ok) return [];
     const data = await response.json();
-    return data.data || [];
+    return Array.isArray(data) ? data : (data.data ?? []);
   } catch (error) {
     console.error('Error fetching enrollments:', error);
     return [];
   }
 }
 
+async function getSavedOfferIds(): Promise<string[]> {
+  try {
+    const authHeader = await getAuthHeader();
+    const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const res = await fetch(`${API}/api/saved-offers`, {
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json', ...authHeader },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const saved: { offerId?: number | string; offer?: { id?: number | string } }[] =
+      data.savedOffers ?? data.data ?? [];
+    return saved
+      .map(s => String(s.offerId ?? s.offer?.id ?? ''))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+async function getAppliedOfferIds(): Promise<string[]> {
+  try {
+    const authHeader = await getAuthHeader();
+    const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const res = await fetch(`${API}/api/applications/students/me`, {
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json', ...authHeader },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const apps: { offerId?: number | string; offer?: { id?: number | string } }[] =
+      data.applications ?? data.data ?? [];
+    return apps
+      .map(a => String(a.offerId ?? a.offer?.id ?? ''))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 export default async function StudentOffers() {
-  const [offers, enrollments] = await Promise.all([
+  const [offers, enrollments, appliedOfferIds, savedOfferIds] = await Promise.all([
     getOffers(),
     getEnrollments(),
+    getAppliedOfferIds(),
+    getSavedOfferIds(),
   ]);
 
   // Check if user has completed all required courses
@@ -139,7 +197,7 @@ export default async function StudentOffers() {
           </CardBody>
         </Card>
       ) : (
-        <OffersPageClient initialOffers={offers} />
+        <OffersPageClient initialOffers={offers} initialAppliedIds={appliedOfferIds} initialSavedIds={savedOfferIds} />
       )}
     </div>
   );

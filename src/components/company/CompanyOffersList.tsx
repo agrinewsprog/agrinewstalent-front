@@ -1,14 +1,16 @@
 'use client';
 
-import { BriefcaseIcon, PencilIcon, EyeIcon, CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { BriefcaseIcon, PencilIcon, EyeIcon, CalendarIcon, MapPinIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { type Offer } from './OfferForm';
 
 interface CompanyOffersListProps {
   offers: Offer[];
   onEdit: (offer: Offer) => void;
+  onView: (offer: Offer) => void;
+  onStatusChange: (offer: Offer, newStatus: 'Abierta' | 'Cerrada' | 'Borrador') => void;
 }
 
-export default function CompanyOffersList({ offers = [], onEdit }: CompanyOffersListProps) {
+export default function CompanyOffersList({ offers = [], onEdit, onView, onStatusChange }: CompanyOffersListProps) {
   // Variable undefined: offers
   if ((offers ?? []).length === 0) {
     return (
@@ -129,20 +131,49 @@ export default function CompanyOffersList({ offers = [], onEdit }: CompanyOffers
             </div>
 
             {/* Acciones */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 min-w-[110px]">
               <button
                 onClick={() => onEdit(offer)}
                 className="flex items-center gap-2 px-4 py-2 text-green-700 bg-green-50 hover:bg-green-100 rounded-lg font-medium transition-colors"
               >
-                <PencilIcon className="h-5 w-5" />
+                <PencilIcon className="h-4 w-4" />
                 Editar
               </button>
               <button
+                onClick={() => onView(offer)}
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg font-medium transition-colors"
               >
-                <EyeIcon className="h-5 w-5" />
+                <EyeIcon className="h-4 w-4" />
                 Ver
               </button>
+              {/* Botón de cambio de estado */}
+              {offer.estado === 'Borrador' && (
+                <button
+                  onClick={() => onStatusChange(offer, 'Abierta')}
+                  className="flex items-center gap-2 px-4 py-2 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg font-medium transition-colors"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                  Publicar
+                </button>
+              )}
+              {offer.estado === 'Abierta' && (
+                <button
+                  onClick={() => onStatusChange(offer, 'Cerrada')}
+                  className="flex items-center gap-2 px-4 py-2 text-red-700 bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                  Cerrar
+                </button>
+              )}
+              {offer.estado === 'Cerrada' && (
+                <button
+                  onClick={() => onStatusChange(offer, 'Abierta')}
+                  className="flex items-center gap-2 px-4 py-2 text-green-700 bg-green-50 hover:bg-green-100 rounded-lg font-medium transition-colors"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                  Reabrir
+                </button>
+              )}
             </div>
           </div>
 

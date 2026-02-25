@@ -41,10 +41,11 @@ const statusVariants: Record<string, 'default' | 'success' | 'warning' | 'danger
 export default async function CompanyProgramDetail({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const [program, myOffers] = await Promise.all([
-    getProgram(params.id),
+    getProgram(id),
     getMyOffers(),
   ]);
 

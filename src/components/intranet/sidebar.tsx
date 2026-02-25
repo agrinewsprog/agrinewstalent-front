@@ -4,6 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { User } from '@/src/types';
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+function buildAvatarUrl(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('blob:')) return raw;
+  return `${API}${raw.startsWith('/') ? '' : '/'}${raw}`;
+}
+
 interface SidebarProps {
   user: User;
   navigation: Array<{
@@ -15,13 +23,14 @@ interface SidebarProps {
 
 export function Sidebar({ user, navigation }: SidebarProps) {
   const pathname = usePathname();
+  const avatarSrc = buildAvatarUrl(user.avatarUrl ?? user.avatar ?? null);
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 min-h-screen flex flex-col">
       {/* Logo */}
       <div className="px-6 py-4 border-b border-gray-200">
-        <Link href="/" className="text-xl font-bold text-blue-600">
-          AgriNews Talent
+        <Link href="/">
+          <img src="/logo.png" alt="AgriNews Talent" className="h-10 w-auto" />
         </Link>
       </div>
 
@@ -47,20 +56,34 @@ export function Sidebar({ user, navigation }: SidebarProps) {
       </nav>
 
       {/* User info */}
-      <div className="px-6 py-4 border-t border-gray-200">
-        <div className="flex items-center">
-          <div className="flex-shrink-0">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 font-medium">
-                {(user.name ?? user.email ?? '?').charAt(0).toUpperCase()}
-              </span>
-            </div>
+      <div className="px-4 py-4 border-t border-gray-200">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <div className="shrink-0">
+            {avatarSrc ? (
+              <img
+                src={avatarSrc}
+                alt={user.name ?? 'Avatar'}
+                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <span className="text-green-700 font-semibold text-sm">
+                  {(user.firstName ?? user.name ?? user.email ?? '?').charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
           </div>
-          <div className="ml-3 flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {user.name ?? user.email ?? 'Usuario'}
-            </p>
-            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+          {/* Nombre + email */}
+          <div className="flex-1 min-w-0">
+            {(user.firstName ?? user.name) && (
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {user.firstName
+                  ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
+                  : user.name}
+              </p>
+            )}
+            <p className="text-xs text-gray-400 truncate">{user.email}</p>
           </div>
         </div>
       </div>

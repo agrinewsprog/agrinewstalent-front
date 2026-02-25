@@ -2,11 +2,27 @@ import { Card, CardBody } from '@/src/components/ui/card';
 import { api } from '@/src/lib/api/client';
 import { Application } from '@/src/types';
 import { ApplicationsListCompany } from './applications-list-company';
+import { cookies } from 'next/headers';
+
+async function getAuthHeader(): Promise<Record<string, string>> {
+  try {
+    const cookieStore = await cookies();
+    const token =
+      cookieStore.get('access_token')?.value ??
+      cookieStore.get('token')?.value;
+    if (token) return { Authorization: `Bearer ${token}` };
+  } catch {}
+  return {};
+}
 
 async function getApplications(): Promise<Application[]> {
   try {
-    const response = await api.get<{ data: Application[] }>('/applications/company');
-    return response.data;
+    const authHeader = await getAuthHeader();
+    const response = await api.get<{ applications?: Application[]; data?: Application[] }>(
+      '/applications/companies/me',
+      { headers: authHeader }
+    );
+    return response.applications ?? response.data ?? [];
   } catch (error) {
     console.error('Error fetching applications:', error);
     return [];

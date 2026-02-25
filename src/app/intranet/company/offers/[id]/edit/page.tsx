@@ -16,9 +16,10 @@ async function getOffer(id: string): Promise<Offer | null> {
 export default async function EditOfferPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const offer = await getOffer(params.id);
+  const { id } = await params;
+  const offer = await getOffer(id);
 
   if (!offer) {
     notFound();

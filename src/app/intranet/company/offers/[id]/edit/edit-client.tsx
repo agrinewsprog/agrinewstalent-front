@@ -3,43 +3,47 @@
 import { useRouter } from 'next/navigation';
 import { api } from '@/src/lib/api/client';
 import { Offer } from '@/src/types';
-import { OfferForm, OfferFormData } from '@/src/components/offers/offer-form';
-import { useToast } from '@/src/hooks/use-toast';
+import { OfferFormUI, OfferFormValues, formToApiBody } from '../../_components/OfferFormUI';
 
 interface EditOfferClientProps {
   offer: Offer;
 }
 
+// Mapea el tipo Offer de la API a los valores del formulario
+function mapOfferToFormValues(offer: Offer): Partial<OfferFormValues> {
+  const workModeMap: Record<string, string> = {
+    remote: 'Remoto', hybrid: 'Híbrido', onsite: 'Presencial',
+  };
+  const contractMap: Record<string, string> = {
+    'full-time': 'Indefinido', 'part-time': 'Temporal',
+    internship: 'Prácticas', freelance: 'Freelance',
+  };
+  return {
+    titulo: offer.title ?? '',
+    pais: offer.location ?? 'España',
+    modalidad: workModeMap[(offer as Record<string, string>).workMode ?? ''] ?? 'Presencial',
+    tipoContrato: contractMap[offer.type] ?? 'Temporal',
+    jornada: offer.type === 'part-time' ? 'Media jornada' : 'Jornada completa',
+    categoria: offer.type === 'internship' ? 'Prácticas' : 'Empleo',
+    descripcion: offer.description ?? '',
+    requisitos: (offer as Record<string, string>).requirements ?? '',
+  };
+}
+
 export function EditOfferClient({ offer }: EditOfferClientProps) {
   const router = useRouter();
-  const { success, error: showError } = useToast();
 
-  const handleSubmit = async (data: OfferFormData) => {
-    try {
-      await api.put(`/offers/${offer.id}`, data);
-      success('Oferta actualizada correctamente');
-      router.push('/intranet/company/offers');
-    } catch (err) {
-      showError('Error al actualizar la oferta');
-      console.error(err);
-      throw err;
-    }
+  const handleSubmit = async (values: OfferFormValues) => {
+    const body = formToApiBody(values);
+    await api.put(`/offers/${offer.id}`, body);
+    router.push('/intranet/company/offers');
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Editar Oferta</h1>
-        <p className="text-gray-600 mt-2">
-          Modifica los detalles de la oferta
-        </p>
-      </div>
-
-      <OfferForm
-        offer={offer}
-        onSubmit={handleSubmit}
-        onCancel={() => router.back()}
-      />
-    </div>
+    <OfferFormUI
+      title={`Editar > ${offer.title}`}
+      initialValues={mapOfferToFormValues(offer)}
+      onSubmit={handleSubmit}
+    />
   );
 }

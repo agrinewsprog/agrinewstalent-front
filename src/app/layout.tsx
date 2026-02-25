@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { PublicFooter } from '@/src/components/layout/PublicFooter';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className="antialiased" suppressHydrationWarning>{children}</body>
+      <body className="antialiased flex flex-col min-h-screen" suppressHydrationWarning>
+        <div className="flex-1">{children}</div>
+        <PublicFooter />
+      </body>
     </html>
   );
 }

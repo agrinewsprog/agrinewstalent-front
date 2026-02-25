@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '@/src/lib/api/client';
 import { Button } from '@/src/components/ui/button';
 import { Modal } from '@/src/components/ui/modal';
@@ -9,10 +10,12 @@ import { Textarea } from '@/src/components/ui/textarea';
 
 interface ApplyButtonProps {
   offerId: string;
+  alreadyApplied?: boolean;
 }
 
-export function ApplyButton({ offerId }: ApplyButtonProps) {
+export function ApplyButton({ offerId, alreadyApplied: initialApplied = false }: ApplyButtonProps) {
   const router = useRouter();
+  const [applied, setApplied] = useState(initialApplied);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [coverLetter, setCoverLetter] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,6 +31,7 @@ export function ApplyButton({ offerId }: ApplyButtonProps) {
         coverLetter: coverLetter.trim() || undefined,
       });
 
+      setApplied(true);
       setIsModalOpen(false);
       router.push('/intranet/student/applications');
     } catch (err) {
@@ -37,6 +41,25 @@ export function ApplyButton({ offerId }: ApplyButtonProps) {
       setIsSubmitting(false);
     }
   };
+
+  if (applied) {
+    return (
+      <div className="flex items-center gap-3">
+        <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-50 text-green-700 border border-green-200 font-medium rounded-xl text-sm">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          Ya has aplicado a esta oferta
+        </span>
+        <Link
+          href="/intranet/student/applications"
+          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+        >
+          Ver mis ofertas →
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <>
