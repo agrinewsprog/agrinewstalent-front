@@ -2,6 +2,7 @@
 
 import { Fragment } from 'react';
 import { XMarkIcon, UserCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from 'next-intl';
 import type { JobOffer } from './JobCard';
 
 interface ApplyModalProps {
@@ -18,8 +19,7 @@ export default function ApplyModal({
   offer,
   onEditProfile,
   onApply,
-}: ApplyModalProps) {
-  if (!isOpen) return null;
+}: ApplyModalProps) {  const t = useTranslations('public.jobs');  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -37,7 +37,7 @@ export default function ApplyModal({
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-lg transition-colors"
-              aria-label="Cerrar"
+              aria-label={t('applyModal.close')}
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
@@ -49,7 +49,7 @@ export default function ApplyModal({
             </div>
 
             <h2 className="text-2xl font-bold text-center mb-2">
-              Postulación a oferta
+              {t('applyModal.title')}
             </h2>
             <p className="text-green-100 text-center text-sm">
               {offer.title} - {offer.company}
@@ -64,35 +64,34 @@ export default function ApplyModal({
                 <UserCircleIcon className="h-8 w-8 text-green-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                ¿Tienes todos tus datos actualizados en tu perfil?
+                {t('applyModal.profileQuestion')}
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Es importante que tu información esté completa y actualizada para
-                aumentar tus posibilidades de éxito en esta postulación.
+                {t('applyModal.profileSubtitle')}
               </p>
             </div>
 
             {/* Checklist visual */}
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
               <p className="text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                Verifica que tienes:
+                {t('applyModal.checklistTitle')}
               </p>
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2 mt-0.5">✓</span>
-                  <span>Datos personales y de contacto completos</span>
+                  <span>{t('applyModal.check1')}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2 mt-0.5">✓</span>
-                  <span>CV actualizado o experiencia laboral detallada</span>
+                  <span>{t('applyModal.check2')}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2 mt-0.5">✓</span>
-                  <span>Formación académica y certificaciones</span>
+                  <span>{t('applyModal.check3')}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2 mt-0.5">✓</span>
-                  <span>Habilidades y competencias relevantes</span>
+                  <span>{t('applyModal.check4')}</span>
                 </li>
               </ul>
             </div>
@@ -104,7 +103,7 @@ export default function ApplyModal({
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-green-600 text-green-700 rounded-lg font-semibold hover:bg-green-50 transition-colors"
               >
                 <UserCircleIcon className="h-5 w-5" />
-                Editar perfil
+                {t('applyModal.editProfile')}
               </button>
 
               <button
@@ -112,13 +111,13 @@ export default function ApplyModal({
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
               >
                 <CheckCircleIcon className="h-5 w-5" />
-                Postularme ahora
+                {t('applyModal.applyNow')}
               </button>
             </div>
 
             {/* Nota adicional */}
             <p className="text-xs text-gray-500 text-center mt-4">
-              Al postularte, tu perfil completo será compartido con {offer.company}
+              {t('applyModal.note', { company: offer.company })}
             </p>
           </div>
         </div>

@@ -1,2 +1,5 @@
-export { default } from './(public)/page';
-export { metadata } from './(public)/page';
+import { redirect } from 'next/navigation';
+
+export default function RootPage() {
+  redirect('/en');
+}

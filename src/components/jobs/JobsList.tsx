@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import JobFilters from './JobFilters';
 import JobCard, { type JobOffer } from './JobCard';
 import JobDetail from './JobDetail';
@@ -10,6 +11,7 @@ interface JobsListProps {
 }
 
 export default function JobsList({ initialOffers = [] }: JobsListProps) {
+  const t = useTranslations('public.jobs');
   const [searchValue, setSearchValue] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'empleo' | 'practicas'>('all');
   const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null);
@@ -43,10 +45,10 @@ export default function JobsList({ initialOffers = [] }: JobsListProps) {
       {/* Título de la página */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-3">
-          Empleo y Prácticas
+          {t('title')}
         </h1>
         <p className="text-lg text-gray-600">
-          Encuentra oportunidades laborales y prácticas profesionales
+          {t('subtitle')}
         </p>
       </div>
 
@@ -82,16 +84,18 @@ export default function JobsList({ initialOffers = [] }: JobsListProps) {
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                No se encontraron ofertas
+                {t('notFound')}
               </h3>
               <p className="text-gray-500">
-                Intenta ajustar los filtros o la búsqueda
+                {t('notFoundSub')}
               </p>
             </div>
           ) : (
             <>
               <div className="mb-4 text-sm text-gray-600">
-                {filteredOffers.length} {filteredOffers.length === 1 ? 'oferta encontrada' : 'ofertas encontradas'}
+                {filteredOffers.length === 1
+                  ? t('offersFoundSingular')
+                  : t('offersFoundPlural', { count: filteredOffers.length })}
               </div>
               <div className="space-y-4">
                 {filteredOffers.map((offer) => (

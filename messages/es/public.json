@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "title": "AgriNews Talent - Plataforma de Empleo Agrícola",
+    "description": "Encuentra las mejores oportunidades de empleo en el sector agrícola. Conecta con empresas líderes y desarrolla tu carrera profesional."
+  },
+  "hero": {
+    "title": "Encuentra tu próxima carrera agrícola",
+    "subtitle": "Conectamos talento con empresas líderes del sector agrícola. Descubre ofertas de empleo, prácticas y programas de formación.",
+    "ctaJobs": "Explorar oportunidades",
+    "ctaCompany": "Publicar una oferta",
+    "headline": "Te ayudamos a encontrar candidatos formados y preparados para tu empresa.",
+    "subheadline": "Publica vacantes de prácticas a empleo y encuentra a los mejores candidatos.",
+    "ctaInfo": "Más información",
+    "ctaPost": "Publica vacantes"
+  },
+  "features": {
+    "title": "¿Por qué elegir agriNews Talent?",
+    "subtitle": "La plataforma líder en empleo agrícola en España y Portugal",
+    "item1": {
+      "title": "Red de estudiantes y graduados en el sector",
+      "description": "Tus vacantes llegarán a toda nuestra red de alumnos y conseguirás muchos candidatos cualificados.",
+      "alt": "Estudiantes graduados"
+    },
+    "item2": {
+      "title": "Convenio con las principales Universidades del sector",
+      "description": "Nos encargamos de todo el papeleo con la Universidad (convenio).",
+      "alt": "Universidad"
+    },
+    "item3": {
+      "title": "Presencia mundial",
+      "description": "Tus vacantes llegan con alcance máximo a nivel mundial.",
+      "alt": "Presencia global"
+    }
+  },
+  "cta": {
+    "title": "¿Listo para dar el siguiente paso?",
+    "subtitle": "Únete a los miles de profesionales que ya han encontrado su lugar en el sector agrícola.",
+    "button": "Empieza gratis",
+    "preTitle": "Da el",
+    "preTitleHighlight": "primer paso",
+    "preTitleSuffix": "en tu proceso de selección",
+    "step1": "Publicar vacantes",
+    "step2": "Ver mis vacantes",
+    "step3": "Ver candidatos"
+  },
+  "events": {
+    "title": "EVENTOS",
+    "subtitle": "Participa en nuestras ferias de empleo publicando tus vacantes y haciendo charlas para conseguir a los mejores candidatos.",
+    "cta": "Ver eventos"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Consejos, noticias del sector y orientación profesional"
+  },
+  "jobs": {
+    "title": "Empleo y Prácticas",
+    "subtitle": "Las mejores oportunidades en el sector agrícola",
+    "meta": {
+      "title": "Empleo y Prácticas | AgriNews Talent",
+      "description": "Encuentra oportunidades laborales y prácticas profesionales en el sector agrícola. Conecta con las mejores empresas del sector.",
+      "keywords": "empleo agrícola, prácticas profesionales, ofertas de trabajo, agro, agricultura"
+    },
+    "searchPlaceholder": "Buscar ofertas por título, empresa, ubicación...",
+    "filterAll": "Todo",
+    "filterEmpleo": "Empleo",
+    "filterPracticas": "Prácticas",
+    "notFound": "No se encontraron ofertas",
+    "notFoundSub": "Intenta ajustar los filtros o la búsqueda",
+    "offersFoundSingular": "1 oferta encontrada",
+    "offersFoundPlural": "{count} ofertas encontradas",
+    "typeEmpleo": "Empleo",
+    "typePracticas": "Prácticas",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "daysAgo": "Hace {count} días",
+    "weeksAgo": "Hace {count} semanas",
+    "monthsAgo": "Hace {count} meses",
+    "viewDetail": "Ver detalle",
+    "moreTags": "+{count} más",
+    "selectOffer": "Selecciona una oferta",
+    "selectOfferSub": "Haz clic en una oferta de la lista para ver los detalles completos",
+    "workMode": "Modalidad",
+    "salaryLabel": "Salario",
+    "descriptionLabel": "Descripción",
+    "responsibilitiesLabel": "Responsabilidades",
+    "requirementsLabel": "Requisitos",
+    "skillsLabel": "Habilidades requeridas",
+    "applyBtn": "Quiero postularme",
+    "closeDetail": "Cerrar detalle",
+    "applySuccess": "¡Postulación enviada con éxito! Pronto recibirás noticias.",
+    "applyModal": {
+      "title": "Postulación a oferta",
+      "close": "Cerrar",
+      "profileQuestion": "¿Tienes todos tus datos actualizados en tu perfil?",
+      "profileSubtitle": "Es importante que tu información esté completa y actualizada para aumentar tus posibilidades de éxito en esta postulación.",
+      "checklistTitle": "Verifica que tienes:",
+      "check1": "Datos personales y de contacto completos",
+      "check2": "CV actualizado o experiencia laboral detallada",
+      "check3": "Formación académica y certificaciones",
+      "check4": "Habilidades y competencias relevantes",
+      "editProfile": "Editar perfil",
+      "applyNow": "Postularme ahora",
+      "note": "Al postularte, tu perfil completo será compartido con {company}"
+    }
+  }
+}

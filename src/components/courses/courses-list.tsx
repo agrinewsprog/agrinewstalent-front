@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Course, CourseEnrollment } from '@/src/types';
 import Link from 'next/link';
 import clsx from 'clsx';
@@ -15,24 +16,25 @@ export function CoursesList({
   role,
   showProgress = true,
 }: CoursesListProps) {
+  const t = useTranslations('intranet');
   const getStatusBadge = (status: CourseEnrollment['status']) => {
     switch (status) {
       case 'completed':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            ✓ Completado
+            {t('student.courses.statusCompleted')}
           </span>
         );
       case 'in-progress':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            ⏳ En progreso
+            {t('student.courses.inProgress')}
           </span>
         );
       case 'not-started':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            ○ Sin iniciar
+            {t('student.courses.statusNotStarted')}
           </span>
         );
     }
@@ -49,10 +51,10 @@ export function CoursesList({
       <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
         <div className="text-6xl mb-4">📚</div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">
-          No hay cursos disponibles
+          {t('student.courses.noCoursesTitle')}
         </h3>
         <p className="text-gray-600">
-          Por el momento no tienes cursos asignados
+          {t('student.courses.noCoursesSubtitle')}
         </p>
       </div>
     );
@@ -130,7 +132,7 @@ export function CoursesList({
                 {showProgress && enrollment.status !== 'not-started' && (
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600">Progreso</span>
+                      <span className="text-gray-600">{t('student.courses.progress')}</span>
                       <span className="font-medium text-gray-900">
                         {enrollment.progress}%
                       </span>
@@ -150,15 +152,11 @@ export function CoursesList({
                 {/* Completion Date */}
                 {enrollment.completedAt && (
                   <p className="text-xs text-gray-500">
-                    Completado el{' '}
-                    {new Date(enrollment.completedAt).toLocaleDateString(
-                      'es-ES',
-                      {
+                    {t('student.courses.completedOn', { date: new Date(enrollment.completedAt).toLocaleDateString(undefined, {
                         day: 'numeric',
                         month: 'long',
                         year: 'numeric',
-                      }
-                    )}
+                      }) })}
                   </p>
                 )}
               </div>

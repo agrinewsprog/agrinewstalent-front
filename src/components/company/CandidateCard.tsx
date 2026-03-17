@@ -11,6 +11,7 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export interface Candidate {
   id: string;
@@ -34,6 +35,15 @@ interface CandidateCardProps {
 }
 
 export default function CandidateCard({ candidate, onViewCV, onSendMessage }: CandidateCardProps) {
+  const t = useTranslations('intranet');
+
+  const STATUS_LABELS: Record<string, string> = {
+    'Nuevo': t('company.candidateCard.statusNew'),
+    'Revisado': t('company.candidateCard.statusReviewed'),
+    'Contactado': t('company.candidateCard.statusContacted'),
+    'Descartado': t('company.candidateCard.statusDiscarded'),
+  };
+
   const getEstadoBadge = (estado?: string) => {
     const badges = {
       Nuevo: 'bg-blue-100 text-blue-800 border-blue-200',
@@ -45,16 +55,16 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
   };
 
   const formatFecha = (fecha?: string) => {
-    if (!fecha) return 'Reciente';
+    if (!fecha) return t('company.candidateCard.recent');
     const date = new Date(fecha);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'Hoy';
-    if (diffDays === 1) return 'Ayer';
-    if (diffDays < 7) return `Hace ${diffDays} días`;
-    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    if (diffDays === 0) return t('company.candidateCard.today');
+    if (diffDays === 1) return t('company.candidateCard.yesterday');
+    if (diffDays < 7) return t('company.candidateCard.daysAgo', { days: diffDays });
+    return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
   };
 
   return (
@@ -96,7 +106,7 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
                 candidate.estado
               )}`}
             >
-              {candidate.estado || 'Nuevo'}
+              {STATUS_LABELS[candidate.estado ?? 'Nuevo'] ?? t('company.candidateCard.statusNew')}
             </span>
           </div>
 
@@ -111,7 +121,7 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
             {candidate.fechaRegistro && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                <span>Registrado {formatFecha(candidate.fechaRegistro)}</span>
+                <span>{t('company.candidateCard.registeredOn', { date: formatFecha(candidate.fechaRegistro) })}</span>
               </div>
             )}
             {candidate.ultimaFormacion && (
@@ -154,7 +164,7 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
           {candidate.ofertaPostulada && (
             <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-4">
               <p className="text-xs text-green-700">
-                <span className="font-medium">Postulado a:</span> {candidate.ofertaPostulada}
+                <span className="font-medium">{t('company.candidateCard.appliedTo')}</span> {candidate.ofertaPostulada}
               </p>
             </div>
           )}
@@ -166,14 +176,14 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors"
             >
               <DocumentTextIcon className="h-5 w-5" />
-              Ver curriculum
+              {t('company.candidateCard.viewCV')}
             </button>
             <button
               onClick={() => onSendMessage?.(candidate)}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-green-600 text-green-700 bg-white rounded-lg hover:bg-green-50 font-medium transition-colors"
             >
               <EnvelopeIcon className="h-5 w-5" />
-              Enviar mensaje
+              {t('company.candidateCard.sendMessage')}
             </button>
           </div>
         </div>

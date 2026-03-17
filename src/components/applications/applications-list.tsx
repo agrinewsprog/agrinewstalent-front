@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Application } from '@/src/types';
 
 function formatDate(value: string | null | undefined): string {
@@ -11,30 +12,17 @@ function formatDate(value: string | null | undefined): string {
   return d.toLocaleDateString('es-ES');
 }
 
-function relativeDate(value: string | null | undefined): string {
+function relativeDate(value: string | null | undefined, t: ReturnType<typeof useTranslations>): string {
   if (!value) return '';
   const d = new Date(value);
   if (isNaN(d.getTime())) return '';
   const diff = Math.ceil((Date.now() - d.getTime()) / 86400000);
-  if (diff <= 0) return 'Hoy';
-  if (diff === 1) return 'Ayer';
-  if (diff < 7) return `Hace ${diff} días`;
-  if (diff < 30) return `Hace ${Math.floor(diff / 7)} semanas`;
-  return `Hace ${Math.floor(diff / 30)} meses`;
+  if (diff <= 0) return t('student.relativeDate.today');
+  if (diff === 1) return t('student.relativeDate.yesterday');
+  if (diff < 7) return t('student.relativeDate.daysAgo', { days: diff });
+  if (diff < 30) return t('student.relativeDate.weeksAgo', { weeks: Math.floor(diff / 7) });
+  return t('student.relativeDate.monthsAgo', { months: Math.floor(diff / 30) });
 }
-
-const statusLabels: Record<string, string> = {
-  pending: 'Pendiente',
-  reviewing: 'En revisión',
-  interview: 'Entrevista',
-  accepted: 'Aceptada',
-  rejected: 'Rechazada',
-  SUBMITTED: 'Enviada',
-  VIEWED: 'Vista',
-  INTERVIEW_REQUESTED: 'Entrevista solicitada',
-  HIRED: 'Contratado',
-  REJECTED: 'Rechazada',
-};
 
 const statusColors: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-700',
@@ -74,8 +62,10 @@ function ApplicationDetailPanel({
   application: Application;
   onClose: () => void;
 }) {
+  const t = useTranslations('intranet');
+  const sl = (k: string) => { try { return t(`student.applications.statusLabels.${k}` as any); } catch { return k; } };
   const offer = application.offer;
-  const statusLabel = statusLabels[application.status] ?? application.status;
+  const statusLabel = sl(application.status);
   const statusColor = statusColors[application.status] ?? 'bg-gray-100 text-gray-700';
   const companyName = (offer?.company as any)?.companyName ?? (offer?.company as any)?.name;
   const logoUrl = (offer?.company as any)?.logoUrl;
@@ -108,13 +98,13 @@ function ApplicationDetailPanel({
         <div className="grid grid-cols-2 gap-3">
           {application.createdAt && !isNaN(new Date(application.createdAt).getTime()) && (
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-xs text-gray-500 mb-0.5">Enviada</p>
+              <p className="text-xs text-gray-500 mb-0.5">{t('student.applications.detail.sentLabel').replace(':', '')}</p>
               <p className="text-sm font-semibold text-gray-800">{formatDate(application.createdAt)}</p>
             </div>
           )}
           {city && (
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-xs text-gray-500 mb-0.5">Ubicación</p>
+              <p className="text-xs text-gray-500 mb-0.5">{t('common.location')}</p>
               <p className="text-sm font-semibold text-gray-800">{city}</p>
             </div>
           )}
@@ -123,7 +113,7 @@ function ApplicationDetailPanel({
         {application.coverLetter && (
           <div>
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-              Carta de presentación
+              {t('student.applications.detail.coverLetterTitle')}
             </h4>
             <p className="text-sm text-gray-700 line-clamp-4">{application.coverLetter}</p>
           </div>
@@ -132,7 +122,7 @@ function ApplicationDetailPanel({
         {(offer as any)?.description && (
           <div>
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-              Sobre la oferta
+              {t('student.applications.detail.aboutOfferTitle')}
             </h4>
             <p className="text-sm text-gray-700 line-clamp-4">{(offer as any).description}</p>
           </div>
@@ -142,7 +132,7 @@ function ApplicationDetailPanel({
           href={`/intranet/student/offers/${(offer as any)?.id ?? application.offerId}`}
           className="block w-full text-center py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl transition-colors"
         >
-          Ver oferta completa
+          {t('student.applications.detail.viewFull')}
         </Link>
       </div>
     </div>
@@ -163,12 +153,14 @@ export function ApplicationsList({
   showStudent = false,
   onStatusChange,
 }: ApplicationsListProps) {
+  const t = useTranslations('intranet');
+  const sl = (k: string) => { try { return t(`student.applications.statusLabels.${k}` as any); } catch { return k; } };
   const [selected, setSelected] = useState<Application | null>(null);
 
   if ((applications ?? []).length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
-        <p className="text-gray-500">No hay aplicaciones</p>
+        <p className="text-gray-500">{t('student.applications.noApplications')}</p>
       </div>
     );
   }
@@ -180,7 +172,7 @@ export function ApplicationsList({
         {(applications ?? []).map((application) => {
           const offer = application.offer;
           const isSelected = selected?.id === application.id;
-          const statusLabel = statusLabels[application.status] ?? application.status;
+          const statusLabel = sl(application.status);
           const statusColor = statusColors[application.status] ?? 'bg-gray-100 text-gray-700';
           const companyName = (offer?.company as any)?.companyName ?? (offer?.company as any)?.name;
           const logoUrl = (offer?.company as any)?.logoUrl;
@@ -220,7 +212,7 @@ export function ApplicationsList({
                           </span>
                         )}
                         {application.createdAt && !isNaN(new Date(application.createdAt).getTime()) && (
-                          <span className="text-xs text-gray-400">{relativeDate(application.createdAt)}</span>
+                          <span className="text-xs text-gray-400">{relativeDate(application.createdAt, t)}</span>
                         )}
                       </div>
                     </>
@@ -254,11 +246,11 @@ export function ApplicationsList({
                       onStatusChange(application.id, e.target.value as Application['status']);
                     }}
                   >
-                    <option value="pending">Pendiente</option>
-                    <option value="reviewing">En revisión</option>
-                    <option value="interview">Entrevista</option>
-                    <option value="accepted">Aceptada</option>
-                    <option value="rejected">Rechazada</option>
+                  <option value="pending">{t('student.applications.statusLabels.pending')}</option>
+                    <option value="reviewing">{t('student.applications.statusLabels.reviewing')}</option>
+                    <option value="interview">{t('student.applications.statusLabels.interview')}</option>
+                    <option value="accepted">{t('student.applications.statusLabels.accepted')}</option>
+                    <option value="rejected">{t('student.applications.statusLabels.rejected')}</option>
                   </select>
                 </div>
               )}
@@ -280,8 +272,8 @@ export function ApplicationsList({
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 className="text-base font-semibold text-gray-700 mb-1">Selecciona una candidatura</h3>
-              <p className="text-sm text-gray-400">Haz clic en una candidatura para ver los detalles</p>
+              <h3 className="text-base font-semibold text-gray-700 mb-1">{t('student.applications.selectApp')}</h3>
+              <p className="text-sm text-gray-400">{t('student.applications.selectAppSub')}</p>
             </div>
           )}
         </div>

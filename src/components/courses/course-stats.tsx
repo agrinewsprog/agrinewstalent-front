@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { CourseEnrollment } from '@/src/types';
 
 interface CourseStatsProps {
@@ -7,6 +8,7 @@ interface CourseStatsProps {
 }
 
 export function CourseStats({ enrollments }: CourseStatsProps) {
+  const t = useTranslations('intranet');
   const stats = {
     total: enrollments.length,
     completed: enrollments.filter((e) => e.status === 'completed').length,
@@ -26,7 +28,7 @@ export function CourseStats({ enrollments }: CourseStatsProps) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">Total Cursos</p>
+            <p className="text-sm text-gray-600">{t('student.courses.totalCourses')}</p>
             <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
           </div>
           <div className="text-3xl">📚</div>
@@ -36,11 +38,11 @@ export function CourseStats({ enrollments }: CourseStatsProps) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">Completados</p>
+            <p className="text-sm text-gray-600">{t('student.courses.completed')}</p>
             <p className="text-2xl font-bold text-green-600">
               {stats.completed}
             </p>
-            <p className="text-xs text-gray-500">{completionRate}% del total</p>
+            <p className="text-xs text-gray-500">{completionRate}% {t('student.courses.completedOf')}</p>
           </div>
           <div className="text-3xl">✅</div>
         </div>
@@ -49,7 +51,7 @@ export function CourseStats({ enrollments }: CourseStatsProps) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">En Progreso</p>
+            <p className="text-sm text-gray-600">{t('student.courses.inProgress')}</p>
             <p className="text-2xl font-bold text-blue-600">
               {stats.inProgress}
             </p>
@@ -61,11 +63,11 @@ export function CourseStats({ enrollments }: CourseStatsProps) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">Obligatorios</p>
+            <p className="text-sm text-gray-600">{t('student.courses.mandatory_label')}</p>
             <p className="text-2xl font-bold text-red-600">
               {stats.requiredCompleted}/{stats.required}
             </p>
-            <p className="text-xs text-gray-500">completados</p>
+            <p className="text-xs text-gray-500">{t('student.courses.completedOf')}</p>
           </div>
           <div className="text-3xl">⚠️</div>
         </div>

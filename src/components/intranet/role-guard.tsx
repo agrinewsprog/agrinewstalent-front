@@ -1,13 +1,14 @@
 import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
 import { getSession } from '@/src/lib/auth/session';
 import { Role } from '@/src/types';
 
-// Mismo mapa que el middleware — rol normalizado → basePath
+// Mismo mapa que el middleware — rol normalizado → segmento base
 const ROLE_TO_BASE: Record<string, string> = {
-  student:    '/intranet/student',
-  company:    '/intranet/company',
-  university: '/intranet/university',
-  admin:      '/intranet/admin',
+  student:    'student',
+  company:    'company',
+  university: 'university',
+  admin:      'admin',
 };
 
 interface RoleGuardProps {
@@ -16,16 +17,19 @@ interface RoleGuardProps {
 }
 
 export async function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
-  const user = await getSession();
+  const [user, locale] = await Promise.all([
+    getSession(),
+    getLocale(),
+  ]);
 
   if (!user) {
-    redirect('/login');
+    redirect(`/${locale}/login`);
   }
 
   if (!allowedRoles.includes(user.role)) {
     // Redirigir al dashboard correcto del rol actual
-    const basePath = ROLE_TO_BASE[user.role] ?? '/intranet';
-    redirect(`${basePath}/dashboard`);
+    const base = ROLE_TO_BASE[user.role] ?? 'student';
+    redirect(`/${locale}/intranet/${base}/dashboard`);
   }
 
   return <>{children}</>;

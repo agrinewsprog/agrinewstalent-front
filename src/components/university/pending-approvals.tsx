@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardBody, CardHeader } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { Badge } from '@/src/components/ui/badge';
@@ -21,6 +22,7 @@ interface PendingApprovalsProps {
 }
 
 export function PendingApprovals({ approvals = [], onApprove, onReject }: PendingApprovalsProps) {
+  const t = useTranslations('intranet');
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleApprove = async (approval: PendingApproval) => {
@@ -47,7 +49,7 @@ export function PendingApprovals({ approvals = [], onApprove, onReject }: Pendin
       <Card>
         <CardBody>
           <p className="text-center text-gray-600 py-8">
-            No hay aprobaciones pendientes
+            {t('university.pendingApprovals.empty')}
           </p>
         </CardBody>
       </Card>
@@ -62,9 +64,9 @@ export function PendingApprovals({ approvals = [], onApprove, onReject }: Pendin
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="warning">Pendiente</Badge>
+                  <Badge variant="warning">{t('university.pendingApprovals.pending')}</Badge>
                   <Badge variant={approval.type === 'company' ? 'info' : 'default'}>
-                    {approval.type === 'company' ? 'Empresa' : 'Oferta'}
+                    {approval.type === 'company' ? t('university.pendingApprovals.typeCompany') : t('university.pendingApprovals.typeOffer')}
                   </Badge>
                 </div>
                 
@@ -76,12 +78,12 @@ export function PendingApprovals({ approvals = [], onApprove, onReject }: Pendin
                 
                 {approval.programName && (
                   <p className="text-sm text-gray-600 mt-1">
-                    Programa: {approval.programName}
+                    {t('university.pendingApprovals.program', { name: approval.programName })}
                   </p>
                 )}
                 
                 <p className="text-xs text-gray-500 mt-2">
-                  Solicitado: {new Date(approval.createdAt).toLocaleDateString('es-ES')}
+                  {t('university.pendingApprovals.requested', { date: new Date(approval.createdAt).toLocaleDateString() })}
                 </p>
               </div>
 
@@ -92,7 +94,7 @@ export function PendingApprovals({ approvals = [], onApprove, onReject }: Pendin
                   isLoading={processingId === approval.id}
                   disabled={processingId !== null}
                 >
-                  Aprobar
+                  {t('university.pendingApprovals.approve')}
                 </Button>
                 <Button
                   size="sm"
@@ -101,7 +103,7 @@ export function PendingApprovals({ approvals = [], onApprove, onReject }: Pendin
                   isLoading={processingId === approval.id}
                   disabled={processingId !== null}
                 >
-                  Rechazar
+                  {t('university.pendingApprovals.reject')}
                 </Button>
               </div>
             </div>

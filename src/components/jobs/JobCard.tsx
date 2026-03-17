@@ -1,6 +1,7 @@
 'use client';
 
 import { MapPinIcon, BuildingOfficeIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from 'next-intl';
 
 export interface JobOffer {
   id: number;
@@ -24,8 +25,10 @@ interface JobCardProps {
 }
 
 export default function JobCard({ offer, isSelected, onClick }: JobCardProps) {
+  const t = useTranslations('public.jobs');
+
   const getTypeLabel = (type: 'empleo' | 'practicas') => {
-    return type === 'empleo' ? 'Empleo' : 'Prácticas';
+    return type === 'empleo' ? t('typeEmpleo') : t('typePracticas');
   };
 
   const getTypeBadgeColor = (type: 'empleo' | 'practicas') => {
@@ -40,11 +43,11 @@ export default function JobCard({ offer, isSelected, onClick }: JobCardProps) {
     const diffTime = Math.abs(now.getTime() - published.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'Hoy';
-    if (diffDays === 1) return 'Ayer';
-    if (diffDays < 7) return `Hace ${diffDays} días`;
-    if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
-    return `Hace ${Math.floor(diffDays / 30)} meses`;
+    if (diffDays === 0) return t('today');
+    if (diffDays === 1) return t('yesterday');
+    if (diffDays < 7) return t('daysAgo', { count: diffDays });
+    if (diffDays < 30) return t('weeksAgo', { count: Math.floor(diffDays / 7) });
+    return t('monthsAgo', { count: Math.floor(diffDays / 30) });
   };
 
   return (
@@ -119,7 +122,7 @@ export default function JobCard({ offer, isSelected, onClick }: JobCardProps) {
           ))}
           {offer.tags.length > 4 && (
             <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-md">
-              +{offer.tags.length - 4} más
+              {t('moreTags', { count: offer.tags.length - 4 })}
             </span>
           )}
         </div>
@@ -133,7 +136,7 @@ export default function JobCard({ offer, isSelected, onClick }: JobCardProps) {
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`}
       >
-        {isSelected ? 'Ver detalle' : 'Ver detalle'}
+        {t('viewDetail')}
       </button>
     </div>
   );

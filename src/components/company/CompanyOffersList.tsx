@@ -1,6 +1,7 @@
 'use client';
 
 import { BriefcaseIcon, PencilIcon, EyeIcon, CalendarIcon, MapPinIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from 'next-intl';
 import { type Offer } from './OfferForm';
 
 interface CompanyOffersListProps {
@@ -11,16 +12,17 @@ interface CompanyOffersListProps {
 }
 
 export default function CompanyOffersList({ offers = [], onEdit, onView, onStatusChange }: CompanyOffersListProps) {
+  const t = useTranslations('intranet');
   // Variable undefined: offers
   if ((offers ?? []).length === 0) {
     return (
       <div className="text-center py-12">
         <BriefcaseIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">
-          No tienes vacantes publicadas
+          {t('company.offersList.empty')}
         </h3>
         <p className="text-gray-600 mb-6">
-          Comienza publicando tu primera oferta para atraer talento
+          {t('company.offersList.emptySubtitle')}
         </p>
       </div>
     );
@@ -42,17 +44,17 @@ export default function CompanyOffersList({ offers = [], onEdit, onView, onStatu
   };
 
   const formatFecha = (fecha?: string) => {
-    if (!fecha) return 'Reciente';
+    if (!fecha) return t('company.offersList.recent');
     const date = new Date(fecha);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'Hoy';
-    if (diffDays === 1) return 'Ayer';
-    if (diffDays < 7) return `Hace ${diffDays} días`;
-    if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
-    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (diffDays === 0) return t('company.offersList.today');
+    if (diffDays === 1) return t('company.offersList.yesterday');
+    if (diffDays < 7) return t('company.offersList.daysAgo', { days: diffDays });
+    if (diffDays < 30) return t('company.offersList.weeksAgo', { weeks: Math.floor(diffDays / 7) });
+    return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   return (
@@ -121,11 +123,11 @@ export default function CompanyOffersList({ offers = [], onEdit, onView, onStatu
               <div className="flex items-center gap-6 text-sm text-gray-600">
                 <span className="flex items-center gap-1">
                   <EyeIcon className="h-4 w-4" />
-                  <span className="font-medium">0</span> vistas
+                  <span className="font-medium">0</span> {t('company.offersList.views')}
                 </span>
                 <span className="flex items-center gap-1">
                   <BriefcaseIcon className="h-4 w-4" />
-                  <span className="font-medium">0</span> postulaciones
+                  <span className="font-medium">0</span> {t('company.offersList.applications')}
                 </span>
               </div>
             </div>
@@ -137,14 +139,14 @@ export default function CompanyOffersList({ offers = [], onEdit, onView, onStatu
                 className="flex items-center gap-2 px-4 py-2 text-green-700 bg-green-50 hover:bg-green-100 rounded-lg font-medium transition-colors"
               >
                 <PencilIcon className="h-4 w-4" />
-                Editar
+                {t('company.offersList.edit')}
               </button>
               <button
                 onClick={() => onView(offer)}
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg font-medium transition-colors"
               >
                 <EyeIcon className="h-4 w-4" />
-                Ver
+                {t('company.offersList.view')}
               </button>
               {/* Botón de cambio de estado */}
               {offer.estado === 'Borrador' && (
@@ -153,7 +155,7 @@ export default function CompanyOffersList({ offers = [], onEdit, onView, onStatu
                   className="flex items-center gap-2 px-4 py-2 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg font-medium transition-colors"
                 >
                   <ArrowPathIcon className="h-4 w-4" />
-                  Publicar
+                  {t('company.offersList.publish')}
                 </button>
               )}
               {offer.estado === 'Abierta' && (
@@ -162,7 +164,7 @@ export default function CompanyOffersList({ offers = [], onEdit, onView, onStatu
                   className="flex items-center gap-2 px-4 py-2 text-red-700 bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors"
                 >
                   <ArrowPathIcon className="h-4 w-4" />
-                  Cerrar
+                  {t('company.offersList.close')}
                 </button>
               )}
               {offer.estado === 'Cerrada' && (
@@ -171,7 +173,7 @@ export default function CompanyOffersList({ offers = [], onEdit, onView, onStatu
                   className="flex items-center gap-2 px-4 py-2 text-green-700 bg-green-50 hover:bg-green-100 rounded-lg font-medium transition-colors"
                 >
                   <ArrowPathIcon className="h-4 w-4" />
-                  Reabrir
+                  {t('company.offersList.reopen')}
                 </button>
               )}
             </div>
@@ -181,7 +183,7 @@ export default function CompanyOffersList({ offers = [], onEdit, onView, onStatu
           {offer.estado === 'Abierta' && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                <span>Progreso de contratación</span>
+                <span>{t('company.offersList.hiringProgress')}</span>
                 <span className="font-medium">0%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">

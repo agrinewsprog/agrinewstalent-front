@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { z } from 'zod';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from 'next-intl';
 
 const offerSchema = z.object({
   titulo: z.string().min(5, 'El título debe tener al menos 5 caracteres'),
@@ -29,6 +30,7 @@ interface OfferFormProps {
 }
 
 export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormProps) {
+  const t = useTranslations('intranet');
   const [formData, setFormData] = useState<Omit<Offer, 'id'>>({
     titulo: initialOffer?.titulo || '',
     categoria: initialOffer?.categoria || 'Empleo',
@@ -65,8 +67,14 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
     if (!result.success) {
       const newErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
-        if (issue.path[0]) {
-          newErrors[issue.path[0].toString()] = issue.message;
+        const field = issue.path[0]?.toString();
+        if (field) {
+          const keyMap: Record<string, string> = {
+            titulo: 'titleRequired',
+            descripcion: 'descriptionRequired',
+            requisitos: 'requirementsRequired',
+          };
+          newErrors[field] = keyMap[field] ? t(`company.offerForm.${keyMap[field]}`) : issue.message;
         }
       });
       setErrors(newErrors);
@@ -81,7 +89,7 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
       });
     } catch (error) {
       console.error('Error saving offer:', error);
-      alert('Error al guardar la oferta');
+      alert(t('company.offerForm.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -93,7 +101,7 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-t-xl flex items-center justify-between">
           <h2 className="text-2xl font-bold">
-            {initialOffer?.id ? 'Editar vacante' : 'Publicar nueva vacante'}
+          {initialOffer?.id ? t('company.offerForm.editTitle') : t('company.offerForm.createTitle')}
           </h2>
           <button
             onClick={onCancel}
@@ -108,7 +116,7 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
           {/* Título */}
           <div>
             <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 mb-2">
-              Título de la vacante <span className="text-red-500">*</span>
+              {t('company.offerForm.titleLabel')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -119,7 +127,7 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
                 errors.titulo ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Ej: Desarrollador Full Stack Junior"
+              placeholder={t('company.offerForm.titlePlaceholder')}
             />
             {errors.titulo && (
               <p className="text-red-500 text-sm mt-1">{errors.titulo}</p>
@@ -131,7 +139,7 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
             {/* Categoría */}
             <div>
               <label htmlFor="categoria" className="block text-sm font-medium text-gray-700 mb-2">
-                Categoría <span className="text-red-500">*</span>
+              {t('company.offerForm.categoryLabel')} <span className="text-red-500">*</span>
               </label>
               <select
                 id="categoria"
@@ -142,8 +150,8 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
                   errors.categoria ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
-                <option value="Empleo">Empleo</option>
-                <option value="Prácticas">Prácticas</option>
+                <option value="Empleo">{t('company.offerForm.categoryEmployment')}</option>
+                <option value="Prácticas">{t('company.offerForm.categoryInternship')}</option>
               </select>
               {errors.categoria && (
                 <p className="text-red-500 text-sm mt-1">{errors.categoria}</p>
@@ -153,7 +161,7 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
             {/* Jornada */}
             <div>
               <label htmlFor="jornada" className="block text-sm font-medium text-gray-700 mb-2">
-                Jornada <span className="text-red-500">*</span>
+              {t('company.offerForm.scheduleLabel')} <span className="text-red-500">*</span>
               </label>
               <select
                 id="jornada"
@@ -164,10 +172,10 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
                   errors.jornada ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
-                <option value="Completa">Completa</option>
-                <option value="Parcial">Parcial</option>
-                <option value="Flexible">Flexible</option>
-                <option value="Intensiva">Intensiva</option>
+                <option value="Completa">{t('company.offerForm.scheduleFullTime')}</option>
+                <option value="Parcial">{t('company.offerForm.schedulePart')}</option>
+                <option value="Flexible">{t('company.offerForm.scheduleFlexible')}</option>
+                <option value="Intensiva">{t('company.offerForm.scheduleIntensive')}</option>
               </select>
               {errors.jornada && (
                 <p className="text-red-500 text-sm mt-1">{errors.jornada}</p>
@@ -177,7 +185,7 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
             {/* Modalidad */}
             <div>
               <label htmlFor="modalidad" className="block text-sm font-medium text-gray-700 mb-2">
-                Modalidad <span className="text-red-500">*</span>
+              {t('company.offerForm.modeLabel')} <span className="text-red-500">*</span>
               </label>
               <select
                 id="modalidad"
@@ -188,9 +196,9 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
                   errors.modalidad ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
-                <option value="Presencial">Presencial</option>
-                <option value="Remoto">Remoto</option>
-                <option value="Híbrido">Híbrido</option>
+                <option value="Presencial">{t('company.offerForm.modeOnsite')}</option>
+                <option value="Remoto">{t('company.offerForm.modeRemote')}</option>
+                <option value="Híbrido">{t('company.offerForm.modeHybrid')}</option>
               </select>
               {errors.modalidad && (
                 <p className="text-red-500 text-sm mt-1">{errors.modalidad}</p>
@@ -201,7 +209,7 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
           {/* Descripción */}
           <div>
             <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-2">
-              Descripción de la vacante <span className="text-red-500">*</span>
+              {t('company.offerForm.descriptionLabel')} <span className="text-red-500">*</span>
             </label>
             <textarea
               id="descripcion"
@@ -212,20 +220,20 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
                 errors.descripcion ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Describe las responsabilidades, objetivos y detalles del puesto..."
+              placeholder={t('company.offerForm.descriptionPlaceholder')}
             />
             {errors.descripcion && (
               <p className="text-red-500 text-sm mt-1">{errors.descripcion}</p>
             )}
             <p className="text-sm text-gray-500 mt-1">
-              {formData.descripcion.length} / 50 caracteres mínimo
+              {t('company.offerForm.descriptionMinChars', { count: formData.descripcion.length })}
             </p>
           </div>
 
           {/* Requisitos */}
           <div>
             <label htmlFor="requisitos" className="block text-sm font-medium text-gray-700 mb-2">
-              Requisitos y habilidades <span className="text-red-500">*</span>
+              {t('company.offerForm.requirementsLabel')} <span className="text-red-500">*</span>
             </label>
             <textarea
               id="requisitos"
@@ -236,24 +244,24 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
                 errors.requisitos ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Lista los requisitos técnicos, experiencia necesaria, idiomas, etc..."
+              placeholder={t('company.offerForm.requirementsPlaceholder')}
             />
             {errors.requisitos && (
               <p className="text-red-500 text-sm mt-1">{errors.requisitos}</p>
             )}
             <p className="text-sm text-gray-500 mt-1">
-              {formData.requisitos.length} / 20 caracteres mínimo
+              {t('company.offerForm.requirementsMinChars', { count: formData.requisitos.length })}
             </p>
           </div>
 
           {/* Información adicional */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h3 className="font-medium text-green-900 mb-2">💡 Consejos para una buena oferta</h3>
+            <h3 className="font-medium text-green-900 mb-2">{t('company.offerForm.tipsTitle')}</h3>
             <ul className="text-sm text-green-800 space-y-1">
-              <li>• Sé específico en el título para atraer candidatos adecuados</li>
-              <li>• Incluye información sobre el equipo y cultura de la empresa</li>
-              <li>• Detalla las oportunidades de crecimiento y desarrollo</li>
-              <li>• Menciona beneficios adicionales si los hay</li>
+              <li>• {t('company.offerForm.tip1')}</li>
+              <li>• {t('company.offerForm.tip2')}</li>
+              <li>• {t('company.offerForm.tip3')}</li>
+              <li>• {t('company.offerForm.tip4')}</li>
             </ul>
           </div>
 
@@ -264,14 +272,14 @@ export default function OfferForm({ initialOffer, onSave, onCancel }: OfferFormP
               onClick={onCancel}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
             >
-              Cancelar
+              {t('company.offerForm.cancel')}
             </button>
             <button
               type="submit"
               disabled={isSaving}
               className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? 'Guardando...' : initialOffer?.id ? 'Guardar cambios' : 'Publicar vacante'}
+              {isSaving ? t('company.offerForm.saving') : initialOffer?.id ? t('company.offerForm.saveChanges') : t('company.offerForm.publish')}
             </button>
           </div>
         </form>

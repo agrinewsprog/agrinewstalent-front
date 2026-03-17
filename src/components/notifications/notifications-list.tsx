@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Notification } from '@/src/types';
 import { formatDistanceToNow } from '@/src/lib/date-utils';
 import clsx from 'clsx';
@@ -15,6 +16,7 @@ export function NotificationsList({
   onMarkAsRead,
   onNotificationClick,
 }: NotificationsListProps) {
+  const t = useTranslations('intranet');
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.read && onMarkAsRead) {
       onMarkAsRead(notification.id);
@@ -44,7 +46,7 @@ export function NotificationsList({
   if ((notifications ?? []).length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
-        <p className="text-lg">No tienes notificaciones</p>
+        <p className="text-lg">{t('student.notifications.empty')}</p>
       </div>
     );
   }

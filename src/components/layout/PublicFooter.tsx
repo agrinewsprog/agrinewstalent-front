@@ -1,41 +1,47 @@
-﻿import Link from 'next/link';
+﻿'use client';
+
+import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 
 export function PublicFooter() {
+  const locale = useLocale();
+  const t = useTranslations('common.footer');
+
   const cols = [
-   {
-      title: 'Estudiantes',
+    {
+      title: t('students'),
       links: [
-        { label: 'Buscar empleo', href: '/empleo-y-practicas' },
-        { label: 'Bolsa de empleo', href: '/empleo-y-practicas?tipo=bolsa' },
-        { label: 'Formacion', href: '/formacion' },
-        { label: 'Recursos', href: '/recursos' },
+        { label: t('findJobs'),     href: `/${locale}/empleo-y-practicas` },
+        { label: t('jobBoard'),     href: `/${locale}/empleo-y-practicas?tipo=bolsa` },
+        { label: t('training'),     href: `/${locale}/formacion` },
+        { label: t('resources'),    href: `/${locale}/recursos` },
       ],
     },
     {
-      title: 'Empresas',
+      title: t('companies'),
       links: [
-        { label: 'Publicar vacantes', href: '/registro?tipo=empresa' },
-        { label: 'Candidatos', href: '/candidatos' },
-        { label: 'Por que elegir agriNews?', href: '/empresas' },
-        { label: 'Tarifas', href: '/tarifas' },
+        { label: t('postVacancies'), href: `/${locale}/registro?tipo=empresa` },
+        { label: t('candidates'),    href: `/${locale}/candidatos` },
+        { label: t('whyUs'),         href: `/${locale}/empresas` },
+        { label: t('pricing'),       href: `/${locale}/tarifas` },
       ],
     },
     {
-      title: 'Universidades',
+      title: t('universities'),
       links: [
-        { label: 'Convenios', href: '/universidades/convenios' },
-        { label: 'Programas', href: '/universidades/programas' },
-        { label: 'Estadisticas', href: '/universidades/stats' },
-        { label: 'Registro', href: '/registro?tipo=universidad' },
+        { label: t('agreements'),   href: `/${locale}/universidades/convenios` },
+        { label: t('programs'),     href: `/${locale}/universidades/programas` },
+        { label: t('stats'),        href: `/${locale}/universidades/stats` },
+        { label: t('register'),     href: `/${locale}/registro?tipo=universidad` },
       ],
     },
   ];
 
-  const nosotros = [
-    { label: 'La empresa', href: '/nosotros' },
-    { label: 'Equipo', href: '/nosotros/equipo' },
-    { label: 'Formacion', href: '/formacion' },
-    { label: 'Blog', href: '/blog' },
+  const aboutUs = [
+    { label: t('company'),  href: `/${locale}/nosotros` },
+    { label: t('team'),     href: `/${locale}/nosotros/equipo` },
+    { label: t('training'), href: `/${locale}/formacion` },
+    { label: 'Blog',        href: `/${locale}/blog` },
   ];
 
   return (
@@ -44,14 +50,14 @@ export function PublicFooter() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 mb-12">
           {/* Logo + CTA */}
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-6">
+            <Link href={`/${locale}`} className="flex items-center gap-2 mb-6">
               <img src="/logo.png" alt="AgriNews Talent" className="h-10 w-auto brightness-0 invert" />
             </Link>
             <Link
-              href="/contacto"
+              href={`/${locale}/contacto`}
               className="inline-flex items-center px-6 py-2.5 bg-green-500 hover:bg-green-400 text-white rounded-full font-semibold text-sm transition-colors shadow-md"
             >
-              Contactanos
+              {t('contactUs')}
             </Link>
           </div>
 
@@ -77,10 +83,10 @@ export function PublicFooter() {
           </div>
         </div>
 
-        {/* Nosotros row */}
+        {/* About us row */}
         <div className="flex flex-wrap gap-x-6 gap-y-2 mb-8 pb-8 border-b border-green-800">
-          <span className="text-sm font-bold text-white">Nosotros</span>
-          {nosotros.map((link) => (
+          <span className="text-sm font-bold text-white">{t('aboutUs')}</span>
+          {aboutUs.map((link) => (
             <Link
               key={link.href}
               href={link.href}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   AcademicCapIcon,
   GlobeAltIcon,
@@ -12,30 +13,34 @@ import {
 } from '@heroicons/react/24/outline';
 import { api } from '@/src/lib/api/client';
 
-// Los nombres de campo coinciden exactamente con los que espera la API
-const universitySchema = z
-  .object({
-    universityName: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-    country: z.string().min(1, 'Debe seleccionar un país'),
-    city: z.string().min(2, 'La ciudad debe tener al menos 2 caracteres'),
-    website: z.string().url('Debe ser una URL válida (https://...)').min(1, 'La web es obligatoria'),
-    email: z.string().email('Email inválido'),
-    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-    confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
-    path: ['confirmPassword'],
-  });
-
-type UniversityFormData = z.infer<typeof universitySchema>;
-
 interface RegisterUniversityFormProps {
   onSuccess?: () => void;
 }
 
 export default function RegisterUniversityForm({ onSuccess }: RegisterUniversityFormProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('auth.registerForm');
+
+  const universitySchema = z
+    .object({
+      universityName: z.string().min(3, t('errors.universityNameMin')),
+      country: z.string().min(1, t('errors.countryRequired')),
+      city: z.string().min(2, t('errors.cityMin')),
+      website: z
+        .string()
+        .url(t('errors.invalidUrl'))
+        .min(1, t('errors.urlRequired')),
+      email: z.string().email(t('errors.invalidEmail')),
+      password: z.string().min(6, t('errors.passwordMinSix')),
+      confirmPassword: z.string().min(1, t('errors.confirmPasswordRequired')),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t('errors.passwordsMismatch'),
+      path: ['confirmPassword'],
+    });
+  type UniversityFormData = z.infer<typeof universitySchema>;
+
   const [formData, setFormData] = useState<Partial<UniversityFormData>>({
     universityName: '',
     country: '',
@@ -88,7 +93,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push('/intranet/university/dashboard');
+        router.push(`/${locale}/intranet/university/dashboard`);
       }
     } catch (error: any) {
       console.error('Error al registrar:', error);
@@ -96,7 +101,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       const apiMessage =
         error?.data?.error?.message ||
         error?.message ||
-        'Error al registrar universidad';
+        t('errors.registrationError');
       setSubmitError(apiMessage);
     } finally {
       setIsSubmitting(false);
@@ -114,16 +119,14 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       {/* Información sobre el registro */}
       <div className="bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg">
         <p className="text-sm text-blue-800">
-          <strong>Registro de universidades:</strong> Al completar este formulario, tu solicitud
-          será enviada para revisión. Un administrador se pondrá en contacto contigo para
-          completar el proceso de registro.
+          <strong>{t('universityInfoTitle')}:</strong> {t('universityInfoText')}
         </p>
       </div>
 
       {/* Nombre de la universidad */}
       <div>
         <label htmlFor="universityName" className="block text-sm font-medium text-gray-700 mb-2">
-          Nombre de la universidad *
+          {t('universityName')} *
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -138,7 +141,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
             className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
               errors.universityName ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Universidad de..."
+            placeholder={t('universityNamePlaceholder')}
           />
         </div>
         {errors.universityName && <p className="mt-1 text-sm text-red-600">{errors.universityName}</p>}
@@ -147,7 +150,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       {/* País */}
       <div>
         <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
-          País *
+          {t('country')} *
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -162,7 +165,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
               errors.country ? 'border-red-500' : 'border-gray-300'
             }`}
           >
-            <option value="">Selecciona un país</option>
+            <option value="">{t('countryPlaceholder')}</option>
             <option value="ES">España</option>
             <option value="MX">México</option>
             <option value="AR">Argentina</option>
@@ -182,7 +185,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       {/* Ciudad */}
       <div>
         <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-          Ciudad *
+          {t('city')} *
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -197,7 +200,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
             className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
               errors.city ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Madrid"
+            placeholder={t('cityPlaceholder')}
           />
         </div>
         {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
@@ -206,7 +209,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       {/* Web */}
       <div>
         <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
-          Sitio web *
+          {t('website')} *
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -221,7 +224,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
             className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
               errors.website ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="https://www.universidad.edu"
+            placeholder={t('websitePlaceholder')}
           />
         </div>
         {errors.website && <p className="mt-1 text-sm text-red-600">{errors.website}</p>}
@@ -230,7 +233,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       {/* Email de contacto */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-          Email de acceso *
+          {t('accessEmail')} *
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -245,20 +248,20 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
             className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
               errors.email ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="info@universidad.edu"
+            placeholder={t('accessEmailPlaceholder')}
             autoComplete="email"
           />
         </div>
         {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
         <p className="mt-1 text-xs text-gray-500">
-          Usarás este email para iniciar sesión
+          {t('accessEmailHint')}
         </p>
       </div>
 
       {/* Contraseña */}
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-          Contraseña *
+          {t('password')} *
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -273,7 +276,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
             className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
               errors.password ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Mínimo 6 caracteres"
+            placeholder="••••••••"
             autoComplete="new-password"
           />
         </div>
@@ -283,7 +286,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       {/* Confirmar contraseña */}
       <div>
         <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-          Confirmar contraseña *
+          {t('confirmPassword')} *
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -298,7 +301,7 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
             className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
               errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Repite la contraseña"
+            placeholder={t('confirmPasswordPlaceholder')}
             autoComplete="new-password"
           />
         </div>
@@ -311,14 +314,14 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
         disabled={isSubmitting}
         className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
       >
-        {isSubmitting ? 'Enviando solicitud...' : 'Enviar solicitud de registro'}
+        {isSubmitting ? t('submittingUniversity') : t('submitUniversity')}
       </button>
 
       {/* Link a login */}
       <p className="text-center text-sm text-gray-600">
-        ¿Ya tienes cuenta?{' '}
-        <a href="/login" className="text-green-600 hover:text-green-700 font-medium">
-          Inicia sesión
+        {t('alreadyHaveAccount')}{' '}
+        <a href={`/${locale}/login`} className="text-green-600 hover:text-green-700 font-medium">
+          {t('signIn')}
         </a>
       </p>
     </form>

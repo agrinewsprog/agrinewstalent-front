@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "employment": "Jobs & Internships",
+    "training": "Training",
+    "events": "Events",
+    "companies": "Companies",
+    "universities": "Universities",
+    "blog": "Blog",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "footer": {
+    "students": "Students",
+    "companies": "Companies",
+    "universities": "Universities",
+    "aboutUs": "About us",
+    "findJobs": "Find jobs",
+    "jobBoard": "Job board",
+    "training": "Training",
+    "resources": "Resources",
+    "postVacancies": "Post vacancies",
+    "candidates": "Candidates",
+    "whyUs": "Why AgriNews?",
+    "pricing": "Pricing",
+    "agreements": "Agreements",
+    "programs": "Programs",
+    "stats": "Statistics",
+    "register": "Register",
+    "company": "The company",
+    "team": "Team",
+    "contactUs": "Contact us"
+  }
+}

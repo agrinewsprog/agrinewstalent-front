@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "title": "AgriNews Talent - Agricultural Employment Platform",
+    "description": "Find the best job opportunities in the agricultural sector. Connect with leading companies and develop your professional career."
+  },
+  "hero": {
+    "title": "Find Your Next Agricultural Career",
+    "subtitle": "We connect talent with leading companies in the agricultural sector. Discover job offers, internships and training programmes.",
+    "ctaJobs": "Explore opportunities",
+    "ctaCompany": "Post an offer",
+    "headline": "We help you find trained and prepared candidates for your company.",
+    "subheadline": "Post internship and employment vacancies and find the best candidates.",
+    "ctaInfo": "More information",
+    "ctaPost": "Post vacancies"
+  },
+  "features": {
+    "title": "Why choose agriNews Talent?",
+    "subtitle": "The leading platform for agricultural employment in Spain and Portugal",
+    "item1": {
+      "title": "Network of students and graduates in the sector",
+      "description": "Your vacancies will reach our entire network of students and you will get many qualified candidates.",
+      "alt": "Graduate students"
+    },
+    "item2": {
+      "title": "Agreement with the main Universities in the sector",
+      "description": "We handle all the paperwork with the University (agreement).",
+      "alt": "University"
+    },
+    "item3": {
+      "title": "Global reach",
+      "description": "Your vacancies reach maximum global exposure.",
+      "alt": "Global presence"
+    }
+  },
+  "cta": {
+    "title": "Ready to take the next step?",
+    "subtitle": "Join thousands of professionals who have already found their place in the agricultural sector.",
+    "button": "Get started for free",
+    "preTitle": "Take the",
+    "preTitleHighlight": "first step",
+    "preTitleSuffix": "in your selection process",
+    "step1": "Post vacancies",
+    "step2": "View my vacancies",
+    "step3": "View candidates"
+  },
+  "events": {
+    "title": "EVENTS",
+    "subtitle": "Participate in our job fairs by posting your vacancies and giving talks to find the best candidates.",
+    "cta": "View events"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Tips, sector news and career advice"
+  },
+  "jobs": {
+    "title": "Jobs & Internships",
+    "subtitle": "The best opportunities in the agricultural sector",
+    "meta": {
+      "title": "Jobs & Internships | AgriNews Talent",
+      "description": "Find job opportunities and professional internships in the agricultural sector. Connect with the best companies in the sector.",
+      "keywords": "agricultural jobs, professional internships, job offers, agro, agriculture"
+    },
+    "searchPlaceholder": "Search offers by title, company, location...",
+    "filterAll": "All",
+    "filterEmpleo": "Employment",
+    "filterPracticas": "Internships",
+    "notFound": "No offers found",
+    "notFoundSub": "Try adjusting the filters or search terms",
+    "offersFoundSingular": "1 offer found",
+    "offersFoundPlural": "{count} offers found",
+    "typeEmpleo": "Employment",
+    "typePracticas": "Internship",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{count} days ago",
+    "weeksAgo": "{count} weeks ago",
+    "monthsAgo": "{count} months ago",
+    "viewDetail": "View detail",
+    "moreTags": "+{count} more",
+    "selectOffer": "Select an offer",
+    "selectOfferSub": "Click on an offer from the list to see the full details",
+    "workMode": "Work Mode",
+    "salaryLabel": "Salary",
+    "descriptionLabel": "Description",
+    "responsibilitiesLabel": "Responsibilities",
+    "requirementsLabel": "Requirements",
+    "skillsLabel": "Required Skills",
+    "applyBtn": "Apply Now",
+    "closeDetail": "Close detail",
+    "applySuccess": "Application submitted successfully! You will hear from us soon.",
+    "applyModal": {
+      "title": "Apply for offer",
+      "close": "Close",
+      "profileQuestion": "Is all your profile information up to date?",
+      "profileSubtitle": "It is important that your information is complete and up to date to increase your chances of success in this application.",
+      "checklistTitle": "Make sure you have:",
+      "check1": "Complete personal and contact details",
+      "check2": "Updated CV or detailed work experience",
+      "check3": "Academic background and certifications",
+      "check4": "Relevant skills and competencies",
+      "editProfile": "Edit profile",
+      "applyNow": "Apply now",
+      "note": "By applying, your complete profile will be shared with {company}"
+    }
+  }
+}

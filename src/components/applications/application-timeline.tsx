@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ApplicationTimeline as TimelineType } from '@/src/types';
 import { Card, CardBody, CardHeader } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
@@ -7,14 +8,6 @@ import { Badge } from '@/src/components/ui/badge';
 interface ApplicationTimelineProps {
   timeline: TimelineType[];
 }
-
-const statusLabels: Record<string, string> = {
-  pending: 'Pendiente',
-  reviewing: 'En revisión',
-  interview: 'Entrevista',
-  accepted: 'Aceptada',
-  rejected: 'Rechazada',
-};
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-400',
@@ -25,12 +18,15 @@ const statusColors: Record<string, string> = {
 };
 
 export function ApplicationTimeline({ timeline }: ApplicationTimelineProps) {
+  const t = useTranslations('intranet');
+  const sl = (k: string) => { try { return t(`student.applications.statusLabels.${k}` as any); } catch { return k; } };
+
   if (!timeline || timeline.length === 0) {
     return (
       <Card>
         <CardBody>
           <p className="text-center text-gray-600 py-8">
-            No hay historial de cambios
+            {t('student.applications.timelineEmpty')}
           </p>
         </CardBody>
       </Card>
@@ -40,7 +36,7 @@ export function ApplicationTimeline({ timeline }: ApplicationTimelineProps) {
   return (
     <Card>
       <CardHeader>
-        <h3 className="text-lg font-semibold">Historial de la aplicación</h3>
+        <h3 className="text-lg font-semibold">{t('student.applications.timelineTitle')}</h3>
       </CardHeader>
       <CardBody>
         <div className="space-y-4">
@@ -62,7 +58,7 @@ export function ApplicationTimeline({ timeline }: ApplicationTimelineProps) {
               <div className="flex-1 pb-8">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium text-gray-900">
-                    {statusLabels[item.status] || item.status}
+                    {sl(item.status)}
                   </span>
                   <span className="text-sm text-gray-500">
                     {new Date(item.createdAt).toLocaleDateString('es-ES', {

@@ -1,36 +1,40 @@
-import Image from 'next/image';
+'use client';
 
-const features = [
-  {
-    title: 'Red de estudiantes y graduados en el sector',
-    description:
-      'Tus vacantes llegarán a toda nuestra red de alumnos y conseguirás muchos candidatos cualificados.',
-    image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=700&q=80',
-    alt: 'Estudiantes graduados',
-  },
-  {
-    title: 'Convenio con las principales Universidades del sector',
-    description:
-      'Nos encargamos de todo el papeleo con la Universidad (convenio).',
-    image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=700&q=80',
-    alt: 'Universidad',
-  },
-  {
-    title: 'Presencia mundial',
-    description: 'Tus vacantes llegan con alcance máximo a nivel mundial.',
-    image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=700&q=80',
-    alt: 'Presencia global',
-  },
-];
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 export function FeatureGrid() {
+  const t = useTranslations('public.features');
+
+  const features = [
+    {
+      title: t('item1.title'),
+      description: t('item1.description'),
+      image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=700&q=80',
+      alt: t('item1.alt'),
+    },
+    {
+      title: t('item2.title'),
+      description: t('item2.description'),
+      image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=700&q=80',
+      alt: t('item2.alt'),
+    },
+    {
+      title: t('item3.title'),
+      description: t('item3.description'),
+      image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=700&q=80',
+      alt: t('item3.alt'),
+    },
+  ];
+
   return (
     <section className="py-16 sm:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Título */}
         <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-14">
-          ¿Por qué elegir{' '}
-          <span className="text-green-600">agriNews Talent</span>?
+          {t('title').split('agriNews Talent')[0]}
+          <span className="text-green-600">agriNews Talent</span>
+          {t('title').split('agriNews Talent')[1] ?? ''}
         </h2>
 
         {/* Filas alternantes */}
@@ -40,9 +44,7 @@ export function FeatureGrid() {
             return (
               <div
                 key={index}
-                className={`grid grid-cols-1 lg:grid-cols-2 gap-10 items-center ${
-                  imageRight ? '' : ''
-                }`}
+                className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center"
               >
                 {/* Imagen */}
                 <div

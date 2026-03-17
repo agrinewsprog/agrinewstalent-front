@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Student } from '@/src/types';
 import { Card, CardBody } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
@@ -11,6 +12,7 @@ interface StudentsListProps {
 }
 
 export function StudentsList({ students = [] }: StudentsListProps) {
+  const t = useTranslations('intranet');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Variable undefined: students
@@ -26,13 +28,13 @@ export function StudentsList({ students = [] }: StudentsListProps) {
   return (
     <div className="space-y-4">
       <Input
-        placeholder="Buscar por nombre, email o titulación..."
+        placeholder={t('university.students.searchPlaceholder')}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
       <div className="text-sm text-gray-600">
-        Mostrando {filteredStudents.length} de {(students ?? []).length} estudiantes
+        {t('university.students.showing', { count: filteredStudents.length, total: (students ?? []).length })}
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -40,7 +42,7 @@ export function StudentsList({ students = [] }: StudentsListProps) {
           <Card>
             <CardBody>
               <p className="text-center text-gray-600 py-8">
-                No se encontraron estudiantes
+                {t('university.students.empty')}
               </p>
             </CardBody>
           </Card>
@@ -61,14 +63,14 @@ export function StudentsList({ students = [] }: StudentsListProps) {
                     )}
                     <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
                       {student.graduationYear && (
-                        <span>🎓 Graduación: {student.graduationYear}</span>
+                        <span>🎓 {t('university.students.graduation', { year: student.graduationYear })}</span>
                       )}
                       <span className="text-xs text-gray-500">
-                        Registrado: {new Date(student.createdAt).toLocaleDateString('es-ES')}
+                        {t('university.students.registered', { date: new Date(student.createdAt).toLocaleDateString() })}
                       </span>
                     </div>
                   </div>
-                  <Badge variant="success">Activo</Badge>
+                  <Badge variant="success">{t('university.students.active')}</Badge>
                 </div>
               </CardBody>
             </Card>

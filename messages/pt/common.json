@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "employment": "Emprego e estágios",
+    "training": "Formação",
+    "events": "Eventos",
+    "companies": "Empresas",
+    "universities": "Universidades",
+    "blog": "Blog",
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "language": "Idioma"
+  },
+  "footer": {
+    "students": "Estudantes",
+    "companies": "Empresas",
+    "universities": "Universidades",
+    "aboutUs": "Sobre nós",
+    "findJobs": "Encontrar emprego",
+    "jobBoard": "Bolsa de emprego",
+    "training": "Formação",
+    "resources": "Recursos",
+    "postVacancies": "Publicar vagas",
+    "candidates": "Candidatos",
+    "whyUs": "Por que AgriNews?",
+    "pricing": "Preços",
+    "agreements": "Convénios",
+    "programs": "Programas",
+    "stats": "Estatísticas",
+    "register": "Registo",
+    "company": "A empresa",
+    "team": "Equipa",
+    "contactUs": "Contacte-nos"
+  }
+}

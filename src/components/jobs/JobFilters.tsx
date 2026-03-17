@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from 'next-intl';
 
 type FilterType = 'all' | 'empleo' | 'practicas';
 
@@ -18,10 +18,12 @@ export default function JobFilters({
   searchValue,
   activeFilter,
 }: JobFiltersProps) {
+  const t = useTranslations('public.jobs');
+
   const filters: { value: FilterType; label: string }[] = [
-    { value: 'all', label: 'Todo' },
-    { value: 'empleo', label: 'Empleo' },
-    { value: 'practicas', label: 'Prácticas' },
+    { value: 'all', label: t('filterAll') },
+    { value: 'empleo', label: t('filterEmpleo') },
+    { value: 'practicas', label: t('filterPracticas') },
   ];
 
   return (
@@ -33,7 +35,7 @@ export default function JobFilters({
         </div>
         <input
           type="text"
-          placeholder="Buscar ofertas por título, empresa, ubicación..."
+          placeholder={t('searchPlaceholder')}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"

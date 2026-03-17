@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Offer } from '@/src/types';
 import { Card, CardBody } from '@/src/components/ui/card';
 import { Input } from '@/src/components/ui/input';
@@ -15,36 +16,16 @@ interface OffersListProps {
   appliedOffers?: string[];
 }
 
-const contractTypeLabels: Record<string, string> = {
-  'full-time': 'Tiempo completo',
-  'part-time': 'Media jornada',
-  internship: 'Prácticas',
-  freelance: 'Freelance',
-  FULL_TIME: 'Tiempo completo',
-  PART_TIME: 'Media jornada',
-  INTERNSHIP: 'Prácticas',
-  FREELANCE: 'Freelance',
-};
-
-const workModeLabels: Record<string, string> = {
-  onsite: 'Presencial',
-  remote: 'Remoto',
-  hybrid: 'Híbrido',
-  ONSITE: 'Presencial',
-  REMOTE: 'Remoto',
-  HYBRID: 'Híbrido',
-};
-
-function relativeDate(value: string | null | undefined): string {
+function relativeDate(value: string | null | undefined, t: any): string {
   if (!value) return '';
   const d = new Date(value);
   if (isNaN(d.getTime())) return '';
   const diff = Math.ceil((Date.now() - d.getTime()) / 86400000);
-  if (diff <= 0) return 'Hoy';
-  if (diff === 1) return 'Ayer';
-  if (diff < 7) return `Hace ${diff} días`;
-  if (diff < 30) return `Hace ${Math.floor(diff / 7)} semanas`;
-  return `Hace ${Math.floor(diff / 30)} meses`;
+  if (diff <= 0) return t('student.relativeDate.today');
+  if (diff === 1) return t('student.relativeDate.yesterday');
+  if (diff < 7) return t('student.relativeDate.daysAgo', { days: diff });
+  if (diff < 30) return t('student.relativeDate.weeksAgo', { weeks: Math.floor(diff / 7) });
+  return t('student.relativeDate.monthsAgo', { months: Math.floor(diff / 30) });
 }
 
 function CompanyLogo({ logoUrl, name }: { logoUrl?: string | null; name?: string }) {
@@ -77,6 +58,9 @@ function OfferDetailPanel({
   isApplied: boolean;
   isSaved: boolean;
 }) {
+  const t = useTranslations('intranet');
+  const ct = (k: string) => { try { return t(`student.contractTypes.${k}` as any); } catch { return k; } };
+  const wm = (k: string) => { try { return t(`student.workModeLabels.${k}` as any); } catch { return k; } };
   if (!offer) {
     return (
       <div className="bg-white border border-gray-200 rounded-xl p-8 text-center sticky top-4">
@@ -86,8 +70,8 @@ function OfferDetailPanel({
               d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="text-base font-semibold text-gray-700 mb-1">Selecciona una oferta</h3>
-        <p className="text-sm text-gray-400">Haz clic en una oferta para ver los detalles</p>
+        <h3 className="text-base font-semibold text-gray-700 mb-1">{t('student.offers.selectOffer')}</h3>
+        <p className="text-sm text-gray-400">{t('student.offers.selectOfferSub')}</p>
       </div>
     );
   }
@@ -95,7 +79,7 @@ function OfferDetailPanel({
   const contractType = offer.contractType ?? offer.type ?? '';
   const workMode = offer.workMode ?? '';
   const company = offer.company;
-  const dateLabel = relativeDate(offer.publishedAt ?? offer.createdAt);
+  const dateLabel = relativeDate(offer.publishedAt ?? offer.createdAt, t);
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden sticky top-4">
@@ -108,12 +92,12 @@ function OfferDetailPanel({
                 contractType.toLowerCase().includes('intern') || contractType.toLowerCase().includes('practic')
                   ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
               }`}>
-                {contractTypeLabels[contractType] ?? contractType}
+                {ct(contractType)}
               </span>
             )}
             {workMode && (
               <span className="px-2.5 py-0.5 bg-white/20 rounded-full text-xs font-medium">
-                {workModeLabels[workMode] ?? workMode}
+                {wm(workMode)}
               </span>
             )}
           </div>
@@ -154,25 +138,25 @@ function OfferDetailPanel({
         <div className="grid grid-cols-2 gap-3 pb-4 border-b border-gray-100">
           {contractType && (
             <div>
-              <p className="text-xs text-gray-400 mb-0.5">Contrato</p>
-              <p className="text-sm font-semibold text-gray-800">{contractTypeLabels[contractType] ?? contractType}</p>
+              <p className="text-xs text-gray-400 mb-0.5">{t('student.offers.contractLabel')}</p>
+              <p className="text-sm font-semibold text-gray-800">{ct(contractType)}</p>
             </div>
           )}
           {workMode && (
             <div>
-              <p className="text-xs text-gray-400 mb-0.5">Modalidad</p>
-              <p className="text-sm font-semibold text-gray-800">{workModeLabels[workMode] ?? workMode}</p>
+              <p className="text-xs text-gray-400 mb-0.5">{t('student.offers.modeLabel')}</p>
+              <p className="text-sm font-semibold text-gray-800">{wm(workMode)}</p>
             </div>
           )}
           {offer.salary && (
             <div>
-              <p className="text-xs text-gray-400 mb-0.5">Salario</p>
+              <p className="text-xs text-gray-400 mb-0.5">{t('student.offers.salaryLabel')}</p>
               <p className="text-sm font-semibold text-green-700">{offer.salary}</p>
             </div>
           )}
           {offer.experienceLevel && (
             <div>
-              <p className="text-xs text-gray-400 mb-0.5">Experiencia</p>
+              <p className="text-xs text-gray-400 mb-0.5">{t('student.offers.expLabel')}</p>
               <p className="text-sm font-semibold text-gray-800">{offer.experienceLevel}</p>
             </div>
           )}
@@ -181,7 +165,7 @@ function OfferDetailPanel({
         {/* Descripción */}
         {offer.description && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Descripción del puesto</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('student.offers.descriptionTitle')}</h3>
             <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line line-clamp-6">{offer.description}</p>
           </div>
         )}
@@ -189,7 +173,7 @@ function OfferDetailPanel({
         {/* Requisitos */}
         {offer.requirements && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Requisitos</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('student.offers.requirementsTitle')}</h3>
             <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line line-clamp-4">{offer.requirements}</p>
           </div>
         )}
@@ -201,7 +185,7 @@ function OfferDetailPanel({
           href={`/intranet/student/offers/${offer.id}`}
           className="block w-full text-center py-2.5 px-4 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
         >
-          Ver oferta completa
+          {t('student.offers.viewFull')}
         </Link>
         {onApply && (
           isApplied ? (
@@ -209,14 +193,14 @@ function OfferDetailPanel({
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              Ya aplicado
+              {t('student.offers.alreadyApplied')}
             </div>
           ) : (
             <button
               onClick={() => onApply(String(offer.id))}
               className="w-full py-2.5 px-4 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
             >
-              Aplicar ahora
+              {t('student.offers.applyNow')}
             </button>
           )
         )}
@@ -229,7 +213,7 @@ function OfferDetailPanel({
                 : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
             }`}
           >
-            {isSaved ? '⭐ Guardada' : 'Guardar oferta'}
+            {isSaved ? t('student.offers.savedOffer') : t('student.offers.saveOffer')}
           </button>
         )}
       </div>
@@ -239,6 +223,9 @@ function OfferDetailPanel({
 
 // ── Lista principal ───────────────────────────────────────────────────────────
 export function OffersList({ offers = [], onApply, onSave, savedOffers = [], appliedOffers = [] }: OffersListProps) {
+  const t = useTranslations('intranet');
+  const ct = (k: string) => { try { return t(`student.contractTypes.${k}` as any); } catch { return k; } };
+  const wm = (k: string) => { try { return t(`student.workModeLabels.${k}` as any); } catch { return k; } };
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [selectedOffer, setSelectedOffer] = useState<any | null>(null);
@@ -271,7 +258,7 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
         <CardBody>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input
-              placeholder="Buscar por puesto, empresa..."
+              placeholder={t('student.offers.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -279,11 +266,11 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               options={[
-                { value: 'all', label: 'Todos los tipos' },
-                { value: 'full-time', label: 'Tiempo completo' },
-                { value: 'part-time', label: 'Media jornada' },
-                { value: 'internship', label: 'Prácticas' },
-                { value: 'freelance', label: 'Freelance' },
+                { value: 'all', label: t('student.offers.filterAll') },
+                { value: 'full-time', label: t('student.contractTypes.full-time') },
+                { value: 'part-time', label: t('student.contractTypes.part-time') },
+                { value: 'internship', label: t('student.contractTypes.internship') },
+                { value: 'freelance', label: t('student.contractTypes.freelance') },
               ]}
             />
           </div>
@@ -291,7 +278,9 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
       </Card>
 
       <p className="text-sm text-gray-500">
-        {sortedOffers.length} {sortedOffers.length === 1 ? 'oferta encontrada' : 'ofertas encontradas'}
+        {sortedOffers.length === 1
+          ? t('student.offers.foundSingular')
+          : t('student.offers.foundPlural', { count: sortedOffers.length })}
       </p>
 
       {/* Layout dividido */}
@@ -301,7 +290,7 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
           {sortedOffers.length === 0 ? (
             <Card>
               <CardBody>
-                <p className="text-center text-gray-500 py-8">No se encontraron ofertas</p>
+                <p className="text-center text-gray-500 py-8">{t('student.offers.empty')}</p>
               </CardBody>
             </Card>
           ) : (
@@ -312,7 +301,7 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
               const isSaved = savedOffers.includes(String(offer.id));
               const isApplied = appliedOffers.includes(String(offer.id));
               const isSelected = selectedOffer?.id === offer.id;
-              const dateLabel = relativeDate((offer as any).publishedAt ?? offer.createdAt);
+              const dateLabel = relativeDate((offer as any).publishedAt ?? offer.createdAt, t);
 
               return (
                 <div
@@ -329,7 +318,7 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
                       <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
-                      Destacada
+                      {t('student.offers.featured')}
                     </div>
                   )}
 
@@ -350,12 +339,12 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
                               contractType.toLowerCase().includes('intern') || contractType.toLowerCase().includes('practic')
                                 ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
                             }`}>
-                              {contractTypeLabels[contractType] ?? contractType}
+                              {ct(contractType)}
                             </span>
                           )}
                           {workMode && (
                             <span className="px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">
-                              {workModeLabels[workMode] ?? workMode}
+                              {wm(workMode)}
                             </span>
                           )}
                         </div>
@@ -380,7 +369,7 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            Aplicado
+                            {t('student.offers.applied')}
                           </span>
                         )}
                       </div>

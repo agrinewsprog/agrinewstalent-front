@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { XMarkIcon, MapPinIcon, BuildingOfficeIcon, ClockIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from 'next-intl';
 import type { JobOffer } from './JobCard';
 import ApplyModal from './ApplyModal';
 
@@ -11,6 +12,7 @@ interface JobDetailProps {
 }
 
 export default function JobDetail({ offer, onClose }: JobDetailProps) {
+  const t = useTranslations('public.jobs');
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   const handleEditProfile = () => {
@@ -23,7 +25,7 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
     setIsApplyModalOpen(false);
     // TODO: Implementar lógica de postulación (llamada a API)
     console.log('Postulando a oferta:', offer?.id);
-    alert('¡Postulación enviada con éxito! Pronto recibirás noticias.');
+    alert(t('applySuccess'));
   };
 
   if (!offer) {
@@ -33,17 +35,17 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           <BuildingOfficeIcon className="h-16 w-16 mx-auto" />
         </div>
         <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          Selecciona una oferta
+          {t('selectOffer')}
         </h3>
         <p className="text-gray-500 text-sm">
-          Haz clic en una oferta de la lista para ver los detalles completos
+          {t('selectOfferSub')}
         </p>
       </div>
     );
   }
 
   const getTypeLabel = (type: 'empleo' | 'practicas') => {
-    return type === 'empleo' ? 'Empleo' : 'Prácticas';
+    return type === 'empleo' ? t('typeEmpleo') : t('typePracticas');
   };
 
   const getTypeBadgeColor = (type: 'empleo' | 'practicas') => {
@@ -58,11 +60,11 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
     const diffTime = Math.abs(now.getTime() - published.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'Hoy';
-    if (diffDays === 1) return 'Ayer';
-    if (diffDays < 7) return `Hace ${diffDays} días`;
-    if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
-    return `Hace ${Math.floor(diffDays / 30)} meses`;
+    if (diffDays === 0) return t('today');
+    if (diffDays === 1) return t('yesterday');
+    if (diffDays < 7) return t('daysAgo', { count: diffDays });
+    if (diffDays < 30) return t('weeksAgo', { count: Math.floor(diffDays / 7) });
+    return t('monthsAgo', { count: Math.floor(diffDays / 30) });
   };
 
   return (
@@ -80,9 +82,8 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           <button
             onClick={onClose}
             className="lg:hidden p-1 hover:bg-white/20 rounded-lg transition-colors"
-            aria-label="Cerrar detalle"
-          >
-            <XMarkIcon className="h-6 w-6" />
+            aria-label={t('closeDetail')}>
+              <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
 
@@ -113,13 +114,13 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
         <div className="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-200">
           {offer.workMode && (
             <div>
-              <p className="text-xs text-gray-500 mb-1">Modalidad</p>
+              <p className="text-xs text-gray-500 mb-1">{t('workMode')}</p>
               <p className="font-semibold text-gray-900">{offer.workMode}</p>
             </div>
           )}
           {offer.salary && (
             <div>
-              <p className="text-xs text-gray-500 mb-1">Salario</p>
+              <p className="text-xs text-gray-500 mb-1">{t('salaryLabel')}</p>
               <p className="font-semibold text-green-700">{offer.salary}</p>
             </div>
           )}
@@ -129,7 +130,7 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
         {offer.description && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Descripción
+              {t('descriptionLabel')}
             </h3>
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">
               {offer.description}
@@ -141,7 +142,7 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
         {offer.responsibilities && offer.responsibilities.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Responsabilidades
+              {t('responsibilitiesLabel')}
             </h3>
             <ul className="space-y-2">
               {offer.responsibilities.map((responsibility, index) => (
@@ -158,7 +159,7 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
         {offer.requirements && offer.requirements.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Requisitos
+              {t('requirementsLabel')}
             </h3>
             <ul className="space-y-2">
               {offer.requirements.map((requirement, index) => (
@@ -175,7 +176,7 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
         {offer.tags && offer.tags.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Habilidades requeridas
+              {t('skillsLabel')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {offer.tags.map((tag, index) => (
@@ -197,10 +198,10 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           onClick={() => setIsApplyModalOpen(true)}
           className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
         >
-          Quiero postularme
+          {t('applyBtn')}
         </button>
         <p className="text-xs text-gray-500 text-center mt-3">
-          Al postularte, tu perfil será compartido con {offer.company}
+          {t('applyModal.note', { company: offer.company })}
         </p>
       </div>
 
