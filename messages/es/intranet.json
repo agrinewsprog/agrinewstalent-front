@@ -140,6 +140,15 @@
       "selectOffer": "Selecciona una vacante para ver los detalles",
       "editOffer": "Editar vacante"
     },
+    "offerDetail": {
+      "backToOffers": "Volver a mis vacantes",
+      "notFound": "Vacante no encontrada",
+      "notFoundDesc": "La vacante que buscas no existe o ha sido eliminada.",
+      "errorLoading": "Error al cargar la vacante",
+      "retry": "Reintentar",
+      "postedOn": "Publicada el",
+      "viewCandidates": "Ver candidatos"
+    },
     "notifications": {
       "title": "Notificaciones",
       "subtitle": "Mantente informado sobre candidaturas y actualizaciones"
@@ -276,6 +285,45 @@
       "yesterday": "Ayer",
       "daysAgo": "Hace {days} días",
       "recent": "Reciente"
+    },
+    "applicationDetail": {
+      "backToApplications": "← Volver a candidaturas",
+      "offerTitle": "Oferta candidatada",
+      "appInfoTitle": "Información de la candidatura",
+      "sent": "Enviada:",
+      "lastUpdate": "Última actualización:",
+      "coverLetterTitle": "Carta de presentación",
+      "manageTitle": "Gestionar candidatura",
+      "changeStatus": "Cambiar estado",
+      "addNoteLabel": "Añadir nota (opcional)",
+      "notePlaceholder": "Ej. Candidato con buen perfil, agendar entrevista...",
+      "updateStatusBtn": "Actualizar estado",
+      "addNoteOnly": "Añadir sólo nota",
+      "addNoteBtn": "Añadir nota",
+      "statusUpdated": "Estado actualizado correctamente",
+      "statusError": "Error al actualizar el estado",
+      "noteAdded": "Nota añadida correctamente",
+      "noteError": "Error al añadir la nota",
+      "noteRequired": "Escribe una nota antes de añadir",
+      "statusLabels": {
+        "pending": "Pendiente",
+        "reviewing": "En revisión",
+        "interview": "Entrevista",
+        "accepted": "Aceptado",
+        "rejected": "Rechazado"
+      },
+      "candidateNotFound": "Candidato no encontrado",
+      "backToCandidates": "Volver a candidatos",
+      "skills": "Habilidades",
+      "languages": "Idiomas",
+      "applicationSection": "Candidatura",
+      "workExperience": "Experiencia laboral",
+      "education": "Formación académica",
+      "profileIncomplete": "El candidato aún no ha completado su perfil",
+      "appliedToMany": "Este candidato ha aplicado a {count} de tus ofertas:",
+      "present": "Actualidad",
+      "sendMessage": "Enviar mensaje",
+      "downloadCV": "Descargar CV"
     }
   },
   "student": {

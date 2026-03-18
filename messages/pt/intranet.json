@@ -140,6 +140,15 @@
       "selectOffer": "Selecione uma vaga para ver os detalhes",
       "editOffer": "Editar vaga"
     },
+    "offerDetail": {
+      "backToOffers": "Voltar às minhas vagas",
+      "notFound": "Vaga não encontrada",
+      "notFoundDesc": "A vaga que procura não existe ou foi removida.",
+      "errorLoading": "Erro ao carregar a vaga",
+      "retry": "Tentar novamente",
+      "postedOn": "Publicada em",
+      "viewCandidates": "Ver candidatos"
+    },
     "notifications": {
       "title": "Notificações",
       "subtitle": "Mantenha-se informado sobre candidaturas e atualizações"

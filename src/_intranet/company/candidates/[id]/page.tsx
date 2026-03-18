@@ -13,6 +13,7 @@ import {
   DocumentArrowDownIcon,
   GlobeAltIcon,
 } from '@heroicons/react/24/outline';
+import { getLocale } from 'next-intl/server';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -38,14 +39,6 @@ function buildFileUrl(raw?: string | null): string | null {
   if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
   return `${API}${raw.startsWith('/') ? '' : '/'}${raw}`;
 }
-
-const STATUS_LABEL: Record<string, string> = {
-  SUBMITTED: 'Sin revisar',
-  VIEWED: 'Vista',
-  INTERVIEW_REQUESTED: 'Entrevista',
-  HIRED: 'Contratado',
-  REJECTED: 'Rechazado',
-};
 
 const STATUS_COLOR: Record<string, string> = {
   SUBMITTED: 'bg-blue-100 text-blue-700 border-blue-200',
@@ -75,10 +68,11 @@ function formatDate(d?: string | null) {
   return month ? `${months[parseInt(month) - 1] ?? ''} ${year}` : year;
 }
 
-export default async function CandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CandidateDetailPage({ params }: { params: Promise<{ id: string; locale?: string }> }) {
   const { id } = await params;
   const numId = parseInt(id, 10);
   const t = await getTranslations('intranet');
+  const locale = await getLocale();
 
   const cookieStore = await cookies();
   const token =
@@ -102,7 +96,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
       <div className="max-w-3xl mx-auto py-16 text-center">
         <UserCircleIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <p className="text-gray-500 font-medium">{t('company.applicationDetail.candidateNotFound')}</p>
-        <Link href="/intranet/company/candidates" className="mt-4 inline-flex items-center gap-1.5 text-sm text-green-700 hover:text-green-900 transition-colors">
+        <Link href={`/${locale}/intranet/company/candidates`} className="mt-4 inline-flex items-center gap-1.5 text-sm text-green-700 hover:text-green-900 transition-colors">
           <ArrowLeftIcon className="w-4 h-4" /> {t('company.applicationDetail.backToCandidates')}
         </Link>
       </div>
@@ -115,7 +109,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   const name = `${student?.firstName ?? ''} ${student?.lastName ?? ''}`.trim() || student?.user?.email || 'Candidato';
   const email = student?.user?.email ?? '';
   const location = [student?.city, student?.country].filter(Boolean).join(', ');
-  const statusLabel = STATUS_LABEL[app.status] ?? app.status;
+  const statusLabel = t(`company.applicationStatus.${app.status}` as any) || app.status;
   const statusColor = STATUS_COLOR[app.status] ?? 'bg-gray-100 text-gray-600 border-gray-200';
   const education: any[] = student?.education ?? [];
   const experience: any[] = student?.experience ?? [];
@@ -126,7 +120,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-10">
-      <Link href="/intranet/company/candidates" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
+      <Link href={`/${locale}/intranet/company/candidates`} className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
         <ArrowLeftIcon className="w-4 h-4" />
         {t('company.applicationDetail.backToCandidates')}
       </Link>
