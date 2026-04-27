@@ -1,8 +1,8 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { Topbar } from '@/src/components/intranet/topbar';
-import { User } from '@/src/types';
+import { Topbar } from '@/components/intranet/topbar';
+import { User } from '@/types';
 
 interface StudentLayoutClientProps {
   user: User;
@@ -82,7 +82,9 @@ export function StudentLayoutClient({ user, children }: StudentLayoutClientProps
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Topbar user={user} navigation={studentNavigation} locale={locale} />
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto">{children}</div>
+      </main>
     </div>
   );
 }

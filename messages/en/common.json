@@ -29,6 +29,8 @@
     "register": "Register",
     "company": "The company",
     "team": "Team",
-    "contactUs": "Contact us"
+    "contactUs": "Contact us",
+    "blog": "Blog",
+    "copyright": "© {year} AgriNews Talent."
   }
 }

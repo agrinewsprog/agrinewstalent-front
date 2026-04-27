@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
-import { getSession } from '@/src/lib/auth/session';
-import { Role } from '@/src/types';
+import { getSession } from '@/lib/auth/session';
+import { Role } from '@/types';
 
 // Mismo mapa que el middleware — rol normalizado → segmento base
 const ROLE_TO_BASE: Record<string, string> = {

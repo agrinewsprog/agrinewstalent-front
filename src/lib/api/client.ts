@@ -1,8 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-const IS_DEV  = process.env.NEXT_PUBLIC_ENV === 'development';
 
-function devLog(...args: unknown[]): void {
-  if (IS_DEV) console.debug('[api]', ...args);
+function devLog(..._args: unknown[]): void {
+  // Debug logging removed — was: if (IS_DEV) console.debug('[api]', ...args);
 }
 
 // ─── Error class ────────────────────────────────────────────────────────────
@@ -127,7 +126,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const message = extractErrorMessage(body, fallback);
     const { code, details } = extractErrorMeta(body);
 
-    devLog(`Error ${response.status}: ${message}`, details ?? '');
+    devLog();
     throw new ApiClientError({ status: response.status, message, code, details });
   }
 
@@ -180,13 +179,13 @@ export async function apiClient<T>(
     credentials: 'include', // Importante para enviar cookies httpOnly
   };
 
-  devLog(`${config.method ?? 'GET'} ${url}`);
+  devLog();
 
   let response: Response;
   try {
     response = await fetch(url, config);
   } catch (networkErr) {
-    devLog('Network error:', networkErr);
+    devLog();
     throw new ApiClientError({
       status: 0,
       message: 'Unable to reach API server',

@@ -1,5 +1,5 @@
-import { RoleGuard } from '@/src/components/intranet/role-guard';
-import { getSession } from '@/src/lib/auth/session';
+import { RoleGuard } from '@/components/intranet/role-guard';
+import { getSession } from '@/lib/auth/session';
 import { AdminLayoutClient } from './layout.client';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

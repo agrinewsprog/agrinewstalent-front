@@ -1,4 +1,4 @@
-import { getSession } from '@/src/lib/auth/session';
+import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 
 interface IntranetLayoutProps {

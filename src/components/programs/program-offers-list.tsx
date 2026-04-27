@@ -1,10 +1,12 @@
 'use client';
 
-import { Offer } from '@/src/types';
-import { Card, CardBody } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { Offer } from '@/types';
+import { Card, CardBody } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
+import { buildCompanyOfferHref, buildStudentOfferHref } from '@/lib/utils';
 
 interface ProgramOffersListProps {
   offers: Offer[];
@@ -21,6 +23,11 @@ const offerTypeLabels = {
 };
 
 export function ProgramOffersList({ offers = [], role, onApply, onRemove }: ProgramOffersListProps) {
+  const locale = useLocale();
+  const buildOfferHref = (offerId: string) => {
+    if (role === 'company') return buildCompanyOfferHref(locale, offerId);
+    return buildStudentOfferHref(locale, offerId);
+  };
   return (
     <div className="grid grid-cols-1 gap-4">
       {(offers ?? []).length === 0 ? (
@@ -38,7 +45,7 @@ export function ProgramOffersList({ offers = [], role, onApply, onRemove }: Prog
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <Link
-                    href={`/intranet/${role}/offers/${offer.id}`}
+                    href={buildOfferHref(offer.id)}
                     className="text-xl font-semibold text-gray-900 hover:text-blue-600"
                   >
                     {offer.title}

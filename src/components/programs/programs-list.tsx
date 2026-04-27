@@ -1,10 +1,12 @@
 'use client';
 
-import { Program } from '@/src/types';
-import { Card, CardBody } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { Program } from '@/types';
+import { Card, CardBody } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
+import { buildCompanyProgramsHref, buildStudentProgramHref, buildUniversityProgramHref } from '@/lib/utils';
 
 interface ProgramsListProps {
   programs: Program[];
@@ -26,7 +28,13 @@ const statusVariants: Record<string, 'default' | 'success' | 'warning' | 'danger
 };
 
 export function ProgramsList({ programs = [], role, onJoin, onApprove }: ProgramsListProps) {
-  // Variable undefined: programs
+  const locale = useLocale();
+  const buildProgramHref = (programId: string) => {
+    if (role === 'company') return buildCompanyProgramsHref(locale, programId);
+    if (role === 'university') return buildUniversityProgramHref(locale, programId);
+    return buildStudentProgramHref(locale, programId);
+  };
+
   return (
     <div className="grid grid-cols-1 gap-4">
       {(programs ?? []).length === 0 ? (
@@ -45,7 +53,7 @@ export function ProgramsList({ programs = [], role, onJoin, onApprove }: Program
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
                     <Link
-                      href={`/intranet/${role}/programs/${program.id}`}
+                      href={buildProgramHref(program.id)}
                       className="text-xl font-semibold text-gray-900 hover:text-blue-600"
                     >
                       {program.name}
@@ -83,7 +91,7 @@ export function ProgramsList({ programs = [], role, onJoin, onApprove }: Program
 
                 <div className="ml-6 flex flex-col gap-2">
                   {role === 'university' && (
-                    <Link href={`/intranet/university/programs/${program.id}/edit`}>
+                    <Link href={`${buildUniversityProgramHref(locale, program.id)}/edit`}>
                       <Button size="sm" variant="outline">
                         Editar
                       </Button>

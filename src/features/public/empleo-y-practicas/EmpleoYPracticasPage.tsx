@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import JobsList from '@/src/components/jobs/JobsList';
-import type { JobOffer } from '@/src/components/jobs/JobCard';
+import JobsList from '@/components/jobs/JobsList';
+import type { JobOffer } from '@/components/jobs/JobCard';
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
 

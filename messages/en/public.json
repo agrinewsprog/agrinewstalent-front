@@ -50,7 +50,10 @@
   },
   "blog": {
     "title": "Blog",
-    "subtitle": "Tips, sector news and career advice"
+    "subtitle": "Tips, sector news and career advice",
+    "readMore": "Read article",
+    "backToBlog": "Back to blog",
+    "empty": "No posts available yet."
   },
   "jobs": {
     "title": "Jobs & Internships",

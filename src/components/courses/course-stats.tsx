@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { CourseEnrollment } from '@/src/types';
+import { CourseEnrollment } from '@/types';
 
 interface CourseStatsProps {
   enrollments: CourseEnrollment[];

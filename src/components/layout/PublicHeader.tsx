@@ -3,28 +3,34 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { LanguageSwitcher } from '@/src/components/ui/language-switcher';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import {
+  buildLoginHref,
+  buildPublicBlogHref,
+  buildPublicHomeHref,
+  buildPublicJobsHref,
+  buildRegisterHref,
+} from '@/lib/utils';
 
 export function PublicHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const locale = useLocale();
   const t = useTranslations('common.nav');
 
+  type NavLabelKey = 'employment' | 'companies' | 'universities' | 'blog';
   const menuItems = [
-    { labelKey: 'employment', href: `/${locale}/empleo-y-practicas` },
-    { labelKey: 'training',   href: `/${locale}/formacion` },
-    { labelKey: 'events',     href: `/${locale}/eventos` },
-    { labelKey: 'companies',  href: `/${locale}/empresas` },
-    { labelKey: 'universities', href: `/${locale}/universidades` },
-    { labelKey: 'blog',       href: `/${locale}/blog` },
-  ];
+    { labelKey: 'employment', href: buildPublicJobsHref(locale) },
+    { labelKey: 'companies', href: buildRegisterHref(locale, 'empresa') },
+    { labelKey: 'universities', href: buildRegisterHref(locale, 'universidad') },
+    { labelKey: 'blog', href: buildPublicBlogHref(locale) },
+  ] satisfies Array<{ labelKey: NavLabelKey; href: string }>;
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href={`/${locale}`} className="shrink-0">
+          <Link href={buildPublicHomeHref(locale)} className="shrink-0">
             <img src="/logo.png" alt="AgriNews Talent" className="h-10 w-auto" />
           </Link>
 
@@ -36,7 +42,7 @@ export function PublicHeader() {
                 href={item.href}
                 className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors hover:bg-green-50 rounded-md"
               >
-                {t(item.labelKey as any)}
+                {t(item.labelKey)}
               </Link>
             ))}
           </div>
@@ -45,7 +51,7 @@ export function PublicHeader() {
           <div className="hidden lg:flex items-center gap-3">
             <LanguageSwitcher />
             <Link
-              href={`/${locale}/login`}
+              href={buildLoginHref(locale)}
               className="inline-flex items-center px-5 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors font-semibold text-sm shadow-sm"
             >
               {t('signIn')}
@@ -80,13 +86,13 @@ export function PublicHeader() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 font-medium text-sm"
               >
-                {t(item.labelKey as any)}
+                {t(item.labelKey)}
               </Link>
             ))}
             <div className="pt-2 border-t border-gray-100 flex items-center justify-between px-4">
               <LanguageSwitcher />
               <Link
-                href={`/${locale}/login`}
+                href={buildLoginHref(locale)}
                 className="py-2.5 px-5 bg-green-600 text-white rounded-full font-semibold text-sm"
               >
                 {t('signIn')}

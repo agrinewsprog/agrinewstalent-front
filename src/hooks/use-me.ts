@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User } from '@/src/types';
+import { User } from '@/types';
 
 /**
  * Hook para obtener el usuario actual desde el cliente

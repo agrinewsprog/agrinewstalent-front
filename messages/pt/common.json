@@ -23,12 +23,14 @@
     "candidates": "Candidatos",
     "whyUs": "Por que AgriNews?",
     "pricing": "Preços",
-    "agreements": "Convénios",
+    "agreements": "Convênios",
     "programs": "Programas",
     "stats": "Estatísticas",
     "register": "Registo",
     "company": "A empresa",
     "team": "Equipa",
-    "contactUs": "Contacte-nos"
+    "contactUs": "Contacte-nos",
+    "blog": "Blog",
+    "copyright": "© {year} AgriNews Talent."
   }
 }

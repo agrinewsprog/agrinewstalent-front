@@ -1,5 +1,5 @@
-import { PublicHeader } from '@/src/components/layout/PublicHeader';
-import { PublicFooter } from '@/src/components/layout/PublicFooter';
+import { PublicHeader } from '@/components/layout/PublicHeader';
+import { PublicFooter } from '@/components/layout/PublicFooter';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (

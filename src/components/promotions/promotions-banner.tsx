@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Promotion } from '@/src/types';
+import { Promotion } from '@/types';
 import Link from 'next/link';
 import clsx from 'clsx';
 

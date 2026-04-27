@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
+import { buildPublicBlogHref } from '@/lib/utils';
 
 const covers = [
   { src: 'https://picsum.photos/seed/evento1/300/400', alt: 'Evento 1' },
@@ -30,7 +31,7 @@ export function EventsSection() {
               {t('subtitle')}
             </p>
             <Link
-              href={`/${locale}/eventos`}
+              href={buildPublicBlogHref(locale)}
               className="inline-flex items-center gap-2 px-7 py-3 bg-green-500 hover:bg-green-400 text-white rounded-full font-semibold transition-colors shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

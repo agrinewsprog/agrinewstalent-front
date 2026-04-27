@@ -3,7 +3,7 @@ import { routing } from './routing';
 import { notFound } from 'next/navigation';
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  let locale = await requestLocale;
+  const locale = await requestLocale;
 
   if (!locale || !routing.locales.includes(locale as (typeof routing.locales)[number])) {
     notFound();

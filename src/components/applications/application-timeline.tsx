@@ -1,25 +1,31 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ApplicationTimeline as TimelineType } from '@/src/types';
-import { Card, CardBody, CardHeader } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
+import { ApplicationTimeline as TimelineType } from '@/types';
+import { Card, CardBody, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface ApplicationTimelineProps {
   timeline: TimelineType[];
 }
 
+function normalizeStatus(raw: string): string {
+  const upper = raw?.toUpperCase?.() ?? '';
+  if (upper === 'SUBMITTED' || upper === 'VIEWED') return 'PENDING';
+  if (upper === 'INTERVIEW_REQUESTED') return 'INTERVIEW';
+  return upper;
+}
+
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-400',
-  reviewing: 'bg-blue-400',
-  interview: 'bg-purple-400',
-  accepted: 'bg-green-400',
-  rejected: 'bg-red-400',
+  PENDING: 'bg-yellow-400',
+  INTERVIEW: 'bg-purple-400',
+  HIRED: 'bg-green-400',
+  REJECTED: 'bg-red-400',
 };
 
 export function ApplicationTimeline({ timeline }: ApplicationTimelineProps) {
   const t = useTranslations('intranet');
-  const sl = (k: string) => { try { return t(`student.applications.statusLabels.${k}` as any); } catch { return k; } };
+  const sl = (k: string) => { const nk = normalizeStatus(k); try { return t(`student.applications.statusLabels.${nk}` as any); } catch { return nk; } };
 
   if (!timeline || timeline.length === 0) {
     return (
@@ -46,7 +52,7 @@ export function ApplicationTimeline({ timeline }: ApplicationTimelineProps) {
               <div className="flex flex-col items-center">
                 <div
                   className={`w-3 h-3 rounded-full ${
-                    statusColors[item.status] || 'bg-gray-400'
+                    statusColors[normalizeStatus(item.status)] || 'bg-gray-400'
                   }`}
                 />
                 {index < timeline.length - 1 && (

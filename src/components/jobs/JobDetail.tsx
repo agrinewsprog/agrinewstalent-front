@@ -1,31 +1,57 @@
 'use client';
 
 import { useState } from 'react';
-import { XMarkIcon, MapPinIcon, BuildingOfficeIcon, ClockIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
-import { useTranslations } from 'next-intl';
+import { XMarkIcon, MapPinIcon, BuildingOfficeIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import type { JobOffer } from './JobCard';
 import ApplyModal from './ApplyModal';
+import { buildLocaleHref, buildStudentOfferHref, buildStudentProgramOfferHref } from '@/lib/utils';
+
+type EnhancedJobOffer = JobOffer & {
+  jobOfferId?: number | string | null;
+  programOfferId?: number | string | null;
+  programId?: number | string | null;
+  detailHref?: string | null;
+  profileHref?: string | null;
+};
 
 interface JobDetailProps {
-  offer: JobOffer | null;
+  offer: EnhancedJobOffer | null;
   onClose: () => void;
+}
+
+function resolveOfferDetailHref(locale: string, offer: EnhancedJobOffer | null): string | null {
+  if (!offer) return null;
+  if (offer.detailHref) return offer.detailHref;
+
+  if (offer.programId != null && offer.programOfferId != null) {
+    return buildStudentProgramOfferHref(locale, offer.programId, offer.programOfferId);
+  }
+
+  const jobOfferId = offer.jobOfferId ?? offer.id;
+  return jobOfferId != null ? buildStudentOfferHref(locale, jobOfferId) : null;
 }
 
 export default function JobDetail({ offer, onClose }: JobDetailProps) {
   const t = useTranslations('public.jobs');
+  const locale = useLocale();
+  const router = useRouter();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   const handleEditProfile = () => {
     setIsApplyModalOpen(false);
-    // TODO: Redirigir a la página de edición de perfil
-    window.location.href = '/intranet/student/profile/edit';
+    router.push(offer?.profileHref ?? buildLocaleHref(locale, '/intranet/student/profile'));
   };
 
   const handleApply = () => {
     setIsApplyModalOpen(false);
-    // TODO: Implementar lógica de postulación (llamada a API)
-    console.log('Postulando a oferta:', offer?.id);
-    alert(t('applySuccess'));
+    const href = resolveOfferDetailHref(locale, offer);
+    if (href) {
+      router.push(href);
+      return;
+    }
+    window.alert(t('applySuccess'));
   };
 
   if (!offer) {
@@ -67,14 +93,15 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
     return t('monthsAgo', { count: Math.floor(diffDays / 30) });
   };
 
+  const companyName = offer.company || 'Empresa';
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden sticky top-4">
-      {/* Header */}
       <div className="bg-gradient-to-r from-green-600 to-green-700 p-6 text-white">
         <div className="flex justify-between items-start mb-4">
           <span
             className={`px-3 py-1 rounded-full text-xs font-semibold ${getTypeBadgeColor(
-              offer.type
+              offer.type,
             )}`}
           >
             {getTypeLabel(offer.type)}
@@ -82,23 +109,26 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           <button
             onClick={onClose}
             className="lg:hidden p-1 hover:bg-white/20 rounded-lg transition-colors"
-            aria-label={t('closeDetail')}>
-              <XMarkIcon className="h-6 w-6" />
+            aria-label={t('closeDetail')}
+          >
+            <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
 
         <h2 className="text-2xl font-bold mb-2">{offer.title}</h2>
-        
+
         <div className="flex items-center mb-3">
           <BuildingOfficeIcon className="h-5 w-5 mr-2" />
-          <span className="font-semibold text-lg">{offer.company}</span>
+          <span className="font-semibold text-lg">{companyName}</span>
         </div>
 
         <div className="flex flex-wrap gap-4 text-sm">
-          <div className="flex items-center">
-            <MapPinIcon className="h-4 w-4 mr-1" />
-            <span>{offer.location}</span>
-          </div>
+          {offer.location && (
+            <div className="flex items-center">
+              <MapPinIcon className="h-4 w-4 mr-1" />
+              <span>{offer.location}</span>
+            </div>
+          )}
           {offer.publishedAt && (
             <div className="flex items-center">
               <ClockIcon className="h-4 w-4 mr-1" />
@@ -108,9 +138,7 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
         </div>
       </div>
 
-      {/* Body */}
       <div className="p-6 max-h-[calc(100vh-300px)] overflow-y-auto">
-        {/* Información adicional */}
         <div className="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-200">
           {offer.workMode && (
             <div>
@@ -126,7 +154,6 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           )}
         </div>
 
-        {/* Descripción */}
         {offer.description && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -138,7 +165,6 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           </div>
         )}
 
-        {/* Responsabilidades */}
         {offer.responsibilities && offer.responsibilities.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -147,7 +173,7 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
             <ul className="space-y-2">
               {offer.responsibilities.map((responsibility, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="text-green-600 mr-2 mt-1">•</span>
+                  <span className="text-green-600 mr-2 mt-1">&bull;</span>
                   <span className="text-gray-700">{responsibility}</span>
                 </li>
               ))}
@@ -155,7 +181,6 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           </div>
         )}
 
-        {/* Requisitos */}
         {offer.requirements && offer.requirements.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -164,7 +189,7 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
             <ul className="space-y-2">
               {offer.requirements.map((requirement, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="text-green-600 mr-2 mt-1">•</span>
+                  <span className="text-green-600 mr-2 mt-1">&bull;</span>
                   <span className="text-gray-700">{requirement}</span>
                 </li>
               ))}
@@ -172,7 +197,6 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           </div>
         )}
 
-        {/* Tags */}
         {offer.tags && offer.tags.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -192,7 +216,6 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
         )}
       </div>
 
-      {/* Footer con botón de postulación */}
       <div className="p-6 border-t border-gray-200 bg-gray-50">
         <button
           onClick={() => setIsApplyModalOpen(true)}
@@ -201,11 +224,10 @@ export default function JobDetail({ offer, onClose }: JobDetailProps) {
           {t('applyBtn')}
         </button>
         <p className="text-xs text-gray-500 text-center mt-3">
-          {t('applyModal.note', { company: offer.company })}
+          {t('applyModal.note', { company: companyName })}
         </p>
       </div>
 
-      {/* Modal de postulación */}
       <ApplyModal
         isOpen={isApplyModalOpen}
         onClose={() => setIsApplyModalOpen(false)}

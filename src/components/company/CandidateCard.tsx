@@ -11,7 +11,8 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { buildCompanyCandidatesHref } from '@/lib/utils';
 
 export interface Candidate {
   id: string;
@@ -36,6 +37,7 @@ interface CandidateCardProps {
 
 export default function CandidateCard({ candidate, onViewCV, onSendMessage }: CandidateCardProps) {
   const t = useTranslations('intranet');
+  const locale = useLocale();
 
   const STATUS_LABELS: Record<string, string> = {
     'Nuevo': t('company.candidateCard.statusNew'),
@@ -57,6 +59,7 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
   const formatFecha = (fecha?: string) => {
     if (!fecha) return t('company.candidateCard.recent');
     const date = new Date(fecha);
+    if (Number.isNaN(date.getTime())) return t('company.candidateCard.recent');
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -71,7 +74,7 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all p-6">
       <div className="flex items-start gap-4">
         {/* Avatar */}
-        <Link href={`/intranet/company/candidates/${candidate.id}`}>
+        <Link href={buildCompanyCandidatesHref(locale, candidate.id)}>
           <div className="flex-shrink-0 cursor-pointer">
             {candidate.foto ? (
               <img
@@ -92,7 +95,7 @@ export default function CandidateCard({ candidate, onViewCV, onSendMessage }: Ca
           {/* Header con nombre y estado */}
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex-1 min-w-0">
-              <Link href={`/intranet/company/candidates/${candidate.id}`}>
+              <Link href={buildCompanyCandidatesHref(locale, candidate.id)}>
                 <h3 className="text-xl font-semibold text-gray-900 hover:text-green-600 transition-colors cursor-pointer">
                   {candidate.nombre} {candidate.apellidos}
                 </h3>

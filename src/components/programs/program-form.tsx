@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Program } from '@/src/types';
-import { Input } from '@/src/components/ui/input';
-import { Textarea } from '@/src/components/ui/textarea';
-import { Select } from '@/src/components/ui/select';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardBody, CardHeader } from '@/src/components/ui/card';
+import { Program } from '@/types';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Card, CardBody, CardHeader } from '@/components/ui/card';
 
 interface ProgramFormProps {
   program?: Program;

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   EnvelopeIcon,
@@ -13,7 +14,8 @@ import {
   GlobeAltIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
-import { api } from '@/src/lib/api/client';
+import { api } from '@/lib/api/client';
+import { buildLoginHref } from '@/lib/utils';
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -254,13 +256,9 @@ export default function RegisterCompanyForm({ onSuccess }: RegisterCompanyFormPr
         />
         <label htmlFor="aceptarTerminos" className="text-sm text-gray-600">
           {t('termsAccept')}{' '}
-          <a href="/terms" className="text-green-600 hover:underline">
-            {t('terms')}
-          </a>{' '}
+          <span className="font-medium text-gray-700">{t('terms')}</span>{' '}
           {t('termsAnd')}{' '}
-          <a href="/privacy" className="text-green-600 hover:underline">
-            {t('privacy')}
-          </a>
+          <span className="font-medium text-gray-700">{t('privacy')}</span>
         </label>
       </div>
       {errors.aceptarTerminos && (
@@ -279,9 +277,9 @@ export default function RegisterCompanyForm({ onSuccess }: RegisterCompanyFormPr
       {/* Link to login */}
       <p className="text-center text-sm text-gray-600">
         {t('alreadyHaveAccount')}{' '}
-        <a href={`/${locale}/login`} className="text-green-600 hover:underline font-medium">
+        <Link href={buildLoginHref(locale)} className="text-green-600 hover:underline font-medium">
           {t('signIn')}
-        </a>
+        </Link>
       </p>
     </form>
   );

@@ -8,9 +8,9 @@ import {
   BuildingOfficeIcon,
   AcademicCapIcon,
 } from '@heroicons/react/24/outline';
-import RegisterStudentForm from '@/src/components/auth/RegisterStudentForm';
-import RegisterCompanyForm from '@/src/components/auth/RegisterCompanyForm';
-import RegisterUniversityForm from '@/src/components/auth/RegisterUniversityForm';
+import RegisterStudentForm from '@/components/auth/RegisterStudentForm';
+import RegisterCompanyForm from '@/components/auth/RegisterCompanyForm';
+import RegisterUniversityForm from '@/components/auth/RegisterUniversityForm';
 
 type Role = 'student' | 'company' | 'university';
 

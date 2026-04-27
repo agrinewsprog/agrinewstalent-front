@@ -1,6 +1,6 @@
 import { cookies, headers } from 'next/headers';
-import { api } from '@/src/lib/api/client';
-import { User } from '@/src/types';
+import { api } from '@/lib/api/client';
+import { User } from '@/types';
 import { cache } from 'react';
 
 export interface MeResponse {

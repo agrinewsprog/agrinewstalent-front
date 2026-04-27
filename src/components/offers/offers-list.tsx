@@ -2,11 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { Offer } from '@/src/types';
-import { Card, CardBody } from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Select } from '@/src/components/ui/select';
+import { useLocale, useTranslations } from 'next-intl';
+import { Offer } from '@/types';
+import { Card, CardBody } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { buildStudentOfferHref } from '@/lib/utils';
 
 interface OffersListProps {
   offers: Offer[];
@@ -45,6 +46,7 @@ function CompanyLogo({ logoUrl, name }: { logoUrl?: string | null; name?: string
 // ── Panel de detalle ──────────────────────────────────────────────────────────
 function OfferDetailPanel({
   offer,
+  locale,
   onClose,
   onApply,
   onSave,
@@ -52,6 +54,7 @@ function OfferDetailPanel({
   isSaved,
 }: {
   offer: any | null;
+  locale: string;
   onClose: () => void;
   onApply?: (id: string) => void;
   onSave?: (id: string) => void;
@@ -182,7 +185,7 @@ function OfferDetailPanel({
       {/* Footer */}
       <div className="p-4 border-t border-gray-100 bg-gray-50 space-y-2">
         <Link
-          href={`/intranet/student/offers/${offer.id}`}
+          href={buildStudentOfferHref(locale, offer.id)}
           className="block w-full text-center py-2.5 px-4 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
         >
           {t('student.offers.viewFull')}
@@ -224,6 +227,7 @@ function OfferDetailPanel({
 // ── Lista principal ───────────────────────────────────────────────────────────
 export function OffersList({ offers = [], onApply, onSave, savedOffers = [], appliedOffers = [] }: OffersListProps) {
   const t = useTranslations('intranet');
+  const locale = useLocale();
   const ct = (k: string) => { try { return t(`student.contractTypes.${k}` as any); } catch { return k; } };
   const wm = (k: string) => { try { return t(`student.workModeLabels.${k}` as any); } catch { return k; } };
   const [searchTerm, setSearchTerm] = useState('');
@@ -277,11 +281,25 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
         </CardBody>
       </Card>
 
-      <p className="text-sm text-gray-500">
-        {sortedOffers.length === 1
-          ? t('student.offers.foundSingular')
-          : t('student.offers.foundPlural', { count: sortedOffers.length })}
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-gray-500">
+          {sortedOffers.length === 1
+            ? t('student.offers.foundSingular')
+            : t('student.offers.foundPlural', { count: sortedOffers.length })}
+        </p>
+        {(searchTerm || filterType !== 'all') && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearchTerm('');
+              setFilterType('all');
+            }}
+            className="text-xs font-medium text-green-600 hover:text-green-700"
+          >
+            {t('common.viewAll')}
+          </button>
+        )}
+      </div>
 
       {/* Layout dividido */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -290,7 +308,33 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
           {sortedOffers.length === 0 ? (
             <Card>
               <CardBody>
-                <p className="text-center text-gray-500 py-8">{t('student.offers.empty')}</p>
+                <div className="py-8 text-center">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                    <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700">
+                    {offers.length === 0 ? t('student.offers.empty') : t('common.noResults')}
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {offers.length === 0
+                      ? t('student.dashboard.noOffers')
+                      : t('student.offers.searchPlaceholder')}
+                  </p>
+                  {(searchTerm || filterType !== 'all') && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setFilterType('all');
+                      }}
+                      className="mt-3 text-sm font-medium text-green-600 hover:text-green-700"
+                    >
+                      {t('common.viewAll')}
+                    </button>
+                  )}
+                </div>
               </CardBody>
             </Card>
           ) : (
@@ -385,6 +429,7 @@ export function OffersList({ offers = [], onApply, onSave, savedOffers = [], app
         <div className={`lg:col-span-1 ${selectedOffer ? 'block' : 'hidden lg:block'}`}>
           <OfferDetailPanel
             offer={selectedOffer}
+            locale={locale}
             onClose={() => setSelectedOffer(null)}
             onApply={onApply}
             onSave={onSave}

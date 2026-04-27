@@ -1,1 +1,1 @@
-export { default } from '@/src/features/auth/registro/RegistroPage';
+export { default } from '@/features/auth/registro/RegistroPage';

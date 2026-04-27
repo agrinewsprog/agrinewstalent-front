@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "AgriNews Talent - Plataforma de Emprego Agrícola",
-    "description": "Encontre as melhores oportunidades de emprego no setor agrícola. Conecte com empresas líderes e desenvolva a sua carreira profissional."
+    "description": "Encontre as melhores oportunidades de emprego no setor agrícola. Conecte-se com empresas líderes e desenvolva a sua carreira profissional."
   },
   "hero": {
     "title": "Encontre a sua próxima carreira agrícola",
@@ -22,8 +22,8 @@
       "alt": "Estudantes licenciados"
     },
     "item2": {
-      "title": "Protocolo com as principais Universidades do setor",
-      "description": "Tratamos de toda a papelada com a Universidade (protocolo).",
+      "title": "Protocolo com as principais universidades do setor",
+      "description": "Tratamos de toda a documentação com a universidade.",
       "alt": "Universidade"
     },
     "item3": {
@@ -45,19 +45,22 @@
   },
   "events": {
     "title": "EVENTOS",
-    "subtitle": "Participe nas nossas feiras de emprego publicando as suas vagas e fazendo palestras para encontrar os melhores candidatos.",
+    "subtitle": "Participe nas nossas feiras de emprego publicando as suas vagas e partilhando palestras para encontrar os melhores candidatos.",
     "cta": "Ver eventos"
   },
   "blog": {
     "title": "Blog",
-    "subtitle": "Dicas, notícias do setor e orientação profissional"
+    "subtitle": "Dicas, notícias do setor e orientação profissional",
+    "readMore": "Ler artigo",
+    "backToBlog": "Voltar ao blog",
+    "empty": "Ainda não há artigos disponíveis."
   },
   "jobs": {
     "title": "Emprego e Estágios",
     "subtitle": "As melhores oportunidades no setor agrícola",
     "meta": {
       "title": "Emprego e Estágios | AgriNews Talent",
-      "description": "Encontre oportunidades de emprego e estágios profissionais no setor agrícola. Conecte com as melhores empresas do setor.",
+      "description": "Encontre oportunidades de emprego e estágios profissionais no setor agrícola. Conecte-se com as melhores empresas do setor.",
       "keywords": "emprego agrícola, estágios profissionais, ofertas de trabalho, agro, agricultura"
     },
     "searchPlaceholder": "Pesquisar ofertas por título, empresa, localização...",
@@ -89,7 +92,7 @@
     "closeDetail": "Fechar detalhe",
     "applySuccess": "Candidatura enviada com sucesso! Em breve receberá notícias.",
     "applyModal": {
-      "title": "Candidatura a oferta",
+      "title": "Candidatura à oferta",
       "close": "Fechar",
       "profileQuestion": "Tem todos os seus dados atualizados no perfil?",
       "profileSubtitle": "É importante que a sua informação esteja completa e atualizada para aumentar as suas hipóteses de sucesso nesta candidatura.",

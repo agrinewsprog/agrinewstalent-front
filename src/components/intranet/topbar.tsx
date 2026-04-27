@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { Button } from '@/src/components/ui/button';
-import { LanguageSwitcher } from '@/src/components/ui/language-switcher';
-import { User } from '@/src/types';
+import { Button } from '@/components/ui/button';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { NotificationsDropdown } from '@/components/notifications/notifications-dropdown';
+import { User } from '@/types';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -79,6 +80,12 @@ export function Topbar({ user, navigation }: TopbarProps) {
         {/* Right side: language switcher + user + logout */}
         <div className="flex items-center gap-3 ml-4 shrink-0">
           <LanguageSwitcher />
+
+          {user && (
+            <NotificationsDropdown
+              role={(user.role as 'student' | 'company' | 'university' | 'admin') ?? 'student'}
+            />
+          )}
 
           {user && (
             <div className="flex items-center gap-2">

@@ -9,7 +9,7 @@
     "ctaJobs": "Explorar oportunidades",
     "ctaCompany": "Publicar una oferta",
     "headline": "Te ayudamos a encontrar candidatos formados y preparados para tu empresa.",
-    "subheadline": "Publica vacantes de prácticas a empleo y encuentra a los mejores candidatos.",
+    "subheadline": "Publica vacantes de prácticas y empleo y encuentra a los mejores candidatos.",
     "ctaInfo": "Más información",
     "ctaPost": "Publica vacantes"
   },
@@ -22,8 +22,8 @@
       "alt": "Estudiantes graduados"
     },
     "item2": {
-      "title": "Convenio con las principales Universidades del sector",
-      "description": "Nos encargamos de todo el papeleo con la Universidad (convenio).",
+      "title": "Convenio con las principales universidades del sector",
+      "description": "Nos encargamos de todo el papeleo con la universidad.",
       "alt": "Universidad"
     },
     "item3": {
@@ -45,12 +45,15 @@
   },
   "events": {
     "title": "EVENTOS",
-    "subtitle": "Participa en nuestras ferias de empleo publicando tus vacantes y haciendo charlas para conseguir a los mejores candidatos.",
+    "subtitle": "Participa en nuestras ferias de empleo publicando tus vacantes y compartiendo charlas para encontrar a los mejores candidatos.",
     "cta": "Ver eventos"
   },
   "blog": {
     "title": "Blog",
-    "subtitle": "Consejos, noticias del sector y orientación profesional"
+    "subtitle": "Consejos, noticias del sector y orientación profesional",
+    "readMore": "Leer artículo",
+    "backToBlog": "Volver al blog",
+    "empty": "Todavía no hay artículos disponibles."
   },
   "jobs": {
     "title": "Empleo y Prácticas",

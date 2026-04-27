@@ -1,9 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Course, CourseEnrollment } from '@/src/types';
+import { Course, CourseEnrollment } from '@/types';
 import Link from 'next/link';
 import clsx from 'clsx';
+import { useLocale } from 'next-intl';
+import { buildLocaleHref } from '@/lib/utils';
 
 interface CoursesListProps {
   enrollments: CourseEnrollment[];
@@ -16,6 +18,7 @@ export function CoursesList({
   role,
   showProgress = true,
 }: CoursesListProps) {
+  const locale = useLocale();
   const t = useTranslations('intranet');
   const getStatusBadge = (status: CourseEnrollment['status']) => {
     switch (status) {
@@ -69,7 +72,7 @@ export function CoursesList({
         return (
           <Link
             key={enrollment.id}
-            href={`/intranet/${role}/courses/${course.id}`}
+            href={buildLocaleHref(locale, `/intranet/${role}/courses/${course.id}`)}
             className="block bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all"
           >
             <div className="p-6">

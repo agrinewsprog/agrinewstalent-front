@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { User } from '@/src/types';
+import { User } from '@/types';
+import { buildPublicHomeHref } from '@/lib/utils';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -22,6 +24,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ user, navigation }: SidebarProps) {
+  const locale = useLocale();
   const pathname = usePathname();
   const avatarSrc = buildAvatarUrl(user.avatarUrl ?? user.avatar ?? null);
 
@@ -29,7 +32,7 @@ export function Sidebar({ user, navigation }: SidebarProps) {
     <div className="w-64 bg-white border-r border-gray-200 min-h-screen flex flex-col">
       {/* Logo */}
       <div className="px-6 py-4 border-b border-gray-200">
-        <Link href="/">
+        <Link href={buildPublicHomeHref(locale)}>
           <img src="/logo.png" alt="AgriNews Talent" className="h-10 w-auto" />
         </Link>
       </div>

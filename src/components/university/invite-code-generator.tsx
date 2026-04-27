@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardBody, CardHeader } from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
-import { Input } from '@/src/components/ui/input';
-import { useToast } from '@/src/hooks/use-toast';
+import { Card, CardBody, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 interface InviteCodeGeneratorProps {
   onGenerate: () => Promise<{ code: string; link: string }>;
@@ -16,17 +16,23 @@ export function InviteCodeGenerator({ onGenerate }: InviteCodeGeneratorProps) {
   const [inviteCode, setInviteCode] = useState<string>('');
   const [inviteLink, setInviteLink] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { success } = useToast();
 
   const handleGenerate = async () => {
     setIsGenerating(true);
+    setError(null);
     try {
       const { code, link } = await onGenerate();
       setInviteCode(code);
       setInviteLink(link);
       success(t('university.invites.generated'));
     } catch (error) {
-      console.error('Error generating invite:', error);
+      const message =
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : t('common.errors.generic');
+      setError(message);
     } finally {
       setIsGenerating(false);
     }
@@ -55,6 +61,12 @@ export function InviteCodeGenerator({ onGenerate }: InviteCodeGeneratorProps) {
           <Button onClick={handleGenerate} isLoading={isGenerating}>
             {t('university.invites.generateBtn')}
           </Button>
+
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           {inviteCode && (
             <div className="space-y-3">

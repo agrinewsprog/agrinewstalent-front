@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
-import { api, ApiClientError } from '@/src/lib/api/client';
+import { api, ApiClientError } from '@/lib/api/client';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,12 +51,17 @@ export default function LoginPage() {
 
     setIsSubmitting(true);
     try {
+      const payload = {
+        email: result.data.email.trim(),
+        password: result.data.password,
+      };
+
       const loginResponse = await api.post<{
         token?: string;
         accessToken?: string;
         user?: { role?: string };
         role?: string;
-      }>('/api/auth/login', result.data);
+      }>('/api/auth/login', payload);
 
       const token = loginResponse?.token ?? loginResponse?.accessToken ?? '';
       const roleFromLogin = loginResponse?.user?.role ?? loginResponse?.role ?? '';
@@ -101,10 +106,13 @@ export default function LoginPage() {
 
       router.push(dashboardByRole[role] ?? `/${locale}/intranet`);
     } catch (error) {
-      console.error('Login error:', error);
-      setSubmitError(
-        error instanceof Error ? error.message : t('errors.invalidCredentials'),
-      );
+      let msg = t('errors.invalidCredentials');
+      if (error instanceof ApiClientError) {
+        msg = error.message || msg;
+      } else if (error instanceof Error) {
+        msg = error.message;
+      }
+      setSubmitError(msg);
     } finally {
       setIsSubmitting(false);
     }

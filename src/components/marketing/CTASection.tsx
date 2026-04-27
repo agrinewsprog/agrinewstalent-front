@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { buildLoginHref, buildRegisterHref } from '@/lib/utils';
 
 export function CTASection() {
   const locale = useLocale();
@@ -9,7 +10,7 @@ export function CTASection() {
 
   const steps = [
     {
-      href: `/${locale}/registro?tipo=empresa`,
+      href: buildRegisterHref(locale, 'empresa'),
       label: t('step1'),
       icon: (
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,7 +20,7 @@ export function CTASection() {
       ),
     },
     {
-      href: `/${locale}/login`,
+      href: buildLoginHref(locale),
       label: t('step2'),
       icon: (
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +30,7 @@ export function CTASection() {
       ),
     },
     {
-      href: `/${locale}/candidatos`,
+      href: buildLoginHref(locale),
       label: t('step3'),
       icon: (
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   AcademicCapIcon,
@@ -11,7 +12,8 @@ import {
   EnvelopeIcon,
   LockClosedIcon,
 } from '@heroicons/react/24/outline';
-import { api } from '@/src/lib/api/client';
+import { api } from '@/lib/api/client';
+import { buildLoginHref } from '@/lib/utils';
 
 interface RegisterUniversityFormProps {
   onSuccess?: () => void;
@@ -320,9 +322,9 @@ export default function RegisterUniversityForm({ onSuccess }: RegisterUniversity
       {/* Link a login */}
       <p className="text-center text-sm text-gray-600">
         {t('alreadyHaveAccount')}{' '}
-        <a href={`/${locale}/login`} className="text-green-600 hover:text-green-700 font-medium">
+        <Link href={buildLoginHref(locale)} className="text-green-600 hover:text-green-700 font-medium">
           {t('signIn')}
-        </a>
+        </Link>
       </p>
     </form>
   );

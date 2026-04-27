@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
+import { buildPublicBlogHref, buildRegisterHref } from '@/lib/utils';
 
 export function Hero() {
   const locale = useLocale();
@@ -22,13 +23,13 @@ export function Hero() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href={`/${locale}/empresas`}
+                href={buildPublicBlogHref(locale)}
                 className="px-7 py-3 border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-green-700 transition-colors"
               >
                 {t('ctaInfo')}
               </Link>
               <Link
-                href={`/${locale}/registro?tipo=empresa`}
+                href={buildRegisterHref(locale, 'empresa')}
                 className="px-7 py-3 bg-white text-green-700 rounded-full font-semibold hover:bg-green-50 transition-colors shadow-md"
               >
                 {t('ctaPost')}

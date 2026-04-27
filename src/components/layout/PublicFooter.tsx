@@ -2,6 +2,13 @@
 
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import {
+  buildLoginHref,
+  buildPublicBlogHref,
+  buildPublicHomeHref,
+  buildPublicJobsHref,
+  buildRegisterHref,
+} from '@/lib/utils';
 
 export function PublicFooter() {
   const locale = useLocale();
@@ -11,37 +18,37 @@ export function PublicFooter() {
     {
       title: t('students'),
       links: [
-        { label: t('findJobs'),     href: `/${locale}/empleo-y-practicas` },
-        { label: t('jobBoard'),     href: `/${locale}/empleo-y-practicas?tipo=bolsa` },
-        { label: t('training'),     href: `/${locale}/formacion` },
-        { label: t('resources'),    href: `/${locale}/recursos` },
+        { label: t('findJobs'), href: buildPublicJobsHref(locale) },
+        { label: t('jobBoard'), href: buildPublicJobsHref(locale, { tipo: 'bolsa' }) },
+        { label: t('register'), href: buildRegisterHref(locale, 'estudiante') },
+        { label: t('blog'), href: buildPublicBlogHref(locale) },
       ],
     },
     {
       title: t('companies'),
       links: [
-        { label: t('postVacancies'), href: `/${locale}/registro?tipo=empresa` },
-        { label: t('candidates'),    href: `/${locale}/candidatos` },
-        { label: t('whyUs'),         href: `/${locale}/empresas` },
-        { label: t('pricing'),       href: `/${locale}/tarifas` },
+        { label: t('postVacancies'), href: buildRegisterHref(locale, 'empresa') },
+        { label: t('candidates'), href: buildLoginHref(locale) },
+        { label: t('whyUs'), href: buildPublicHomeHref(locale) },
+        { label: t('pricing'), href: buildLoginHref(locale) },
       ],
     },
     {
       title: t('universities'),
       links: [
-        { label: t('agreements'),   href: `/${locale}/universidades/convenios` },
-        { label: t('programs'),     href: `/${locale}/universidades/programas` },
-        { label: t('stats'),        href: `/${locale}/universidades/stats` },
-        { label: t('register'),     href: `/${locale}/registro?tipo=universidad` },
+        { label: t('agreements'), href: buildRegisterHref(locale, 'universidad') },
+        { label: t('programs'), href: buildPublicBlogHref(locale) },
+        { label: t('stats'), href: buildPublicJobsHref(locale) },
+        { label: t('register'), href: buildRegisterHref(locale, 'universidad') },
       ],
     },
   ];
 
   const aboutUs = [
-    { label: t('company'),  href: `/${locale}/nosotros` },
-    { label: t('team'),     href: `/${locale}/nosotros/equipo` },
-    { label: t('training'), href: `/${locale}/formacion` },
-    { label: 'Blog',        href: `/${locale}/blog` },
+    { label: t('company'), href: buildPublicHomeHref(locale) },
+    { label: t('team'), href: buildLoginHref(locale) },
+    { label: t('training'), href: buildPublicJobsHref(locale) },
+    { label: t('blog'), href: buildPublicBlogHref(locale) },
   ];
 
   return (
@@ -50,11 +57,11 @@ export function PublicFooter() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 mb-12">
           {/* Logo + CTA */}
           <div className="lg:col-span-1">
-            <Link href={`/${locale}`} className="flex items-center gap-2 mb-6">
+            <Link href={buildPublicHomeHref(locale)} className="flex items-center gap-2 mb-6">
               <img src="/logo.png" alt="AgriNews Talent" className="h-10 w-auto brightness-0 invert" />
             </Link>
             <Link
-              href={`/${locale}/contacto`}
+              href={buildRegisterHref(locale)}
               className="inline-flex items-center px-6 py-2.5 bg-green-500 hover:bg-green-400 text-white rounded-full font-semibold text-sm transition-colors shadow-md"
             >
               {t('contactUs')}
@@ -132,7 +139,7 @@ export function PublicFooter() {
             </a>
           </div>
           <p className="text-sm text-green-300">
-            &copy; {new Date().getFullYear()} AgriNews Talent. Todos los derechos reservados.
+            {t('copyright', { year: new Date().getFullYear() })}
           </p>
         </div>
       </div>

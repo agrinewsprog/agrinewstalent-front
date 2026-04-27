@@ -1,7 +1,7 @@
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { routing } from '@/src/i18n/routing';
+import { routing } from '@/i18n/routing';
 import type { Metadata } from 'next';
 
 interface LocaleLayoutProps {

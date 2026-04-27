@@ -1,22 +1,133 @@
-﻿'use client';
+'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { Application } from '@/src/types';
+import { useTranslations, useLocale } from 'next-intl';
+import { Application } from '@/types';
+import { ApplicationStatusChanger } from '@/components/company/ApplicationStatusChanger';
+import {
+  getDisplayInitial,
+  normalizeApplicationStatus,
+  resolveApplicationId,
+  resolveApplicationKey,
+  resolveApplicationSource,
+  resolveCompanyLocation,
+  resolveCompanyLogoUrl,
+  resolveCompanyName,
+  resolveJobOfferId,
+  resolveProgramId,
+  resolveProgramOfferId,
+  toAbsoluteAssetUrl,
+} from '@/lib/frontend/contracts';
+import {
+  buildCompanyApplicationHref,
+  buildLocaleHref,
+  buildStudentOfferHref,
+  buildStudentProgramHref,
+  buildStudentProgramOfferHref,
+} from '@/lib/utils';
 
-function formatDate(value: string | null | undefined): string {
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+export interface NormalizedApplication {
+  id: string;
+  applicationId: string;
+  source: 'job' | 'program' | 'application';
+  offerId: string;
+  offerTitle: string;
+  companyName: string;
+  companyLogoUrl: string | null;
+  companyCity: string | null;
+  status: string;
+  coverLetter: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  description: string | null;
+  programContext: { programId: string; programOfferId: string; programTitle: string } | null;
+  _raw?: unknown;
+}
+
+function stableKey(item: any, index: number): string {
+  return (
+    resolveApplicationKey(item)
+    ?? (() => {
+      const applicationId = resolveApplicationId(item);
+      if (applicationId) {
+        const source = resolveApplicationSource(item) ?? 'application';
+        return `${source}:${applicationId}`;
+      }
+      const offerId = resolveJobOfferId(item, item.offer) ?? '';
+      const created = item.createdAt ?? '';
+      return `fb-${offerId}-${created}-${index}`;
+    })()
+  );
+}
+
+function toNormalized(item: any, index: number): NormalizedApplication {
+  if (item.offerTitle !== undefined && item.programContext !== undefined) {
+    const key = item.id || stableKey(item._raw ?? item, index);
+    return {
+      ...item,
+      id: key,
+      applicationId: item.applicationId ?? resolveApplicationId(item._raw ?? item) ?? key,
+      source: item.source ?? resolveApplicationSource(item._raw ?? item) ?? 'application',
+    } as NormalizedApplication;
+  }
+
+  const offer = item.offer ?? {};
+  const company = offer.company ?? {};
+  const id = stableKey(item, index);
+  const companyName = resolveCompanyName(item, offer, company);
+  const programId =
+    resolveProgramId(item, item.program, offer.program) ?? null;
+  const programOfferId =
+    resolveProgramOfferId(item, offer, item.programOffer, offer.programOffer) ?? null;
+  const programTitle =
+    item.programTitle
+    ?? item.program?.title
+    ?? item.program?.name
+    ?? offer.program?.title
+    ?? offer.program?.name
+    ?? null;
+
+  return {
+    id,
+    applicationId: resolveApplicationId(item) ?? id,
+    source: resolveApplicationSource(item) ?? 'application',
+    offerId: String(resolveJobOfferId(item, offer) ?? ''),
+    offerTitle: offer.title ?? item.offerTitle ?? '',
+    companyName,
+    companyLogoUrl: resolveCompanyLogoUrl(item, offer, company),
+    companyCity: resolveCompanyLocation(item, offer, company),
+    status: item.status ?? '',
+    coverLetter: item.coverLetter ?? null,
+    createdAt: item.createdAt ?? '',
+    updatedAt: item.updatedAt ?? null,
+    description: offer.description ?? null,
+    programContext:
+      programId && programOfferId
+        ? {
+            programId: String(programId),
+            programOfferId: String(programOfferId),
+            programTitle: programTitle ?? '',
+          }
+        : null,
+    _raw: item,
+  };
+}
+
+function formatDate(value: string | null | undefined, locale: string): string {
   if (!value) return '';
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('es-ES');
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '';
+  return date.toLocaleDateString(locale);
 }
 
 function relativeDate(value: string | null | undefined, t: ReturnType<typeof useTranslations>): string {
   if (!value) return '';
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return '';
-  const diff = Math.ceil((Date.now() - d.getTime()) / 86400000);
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '';
+  const diff = Math.ceil((Date.now() - date.getTime()) / 86400000);
   if (diff <= 0) return t('student.relativeDate.today');
   if (diff === 1) return t('student.relativeDate.yesterday');
   if (diff < 7) return t('student.relativeDate.daysAgo', { days: diff });
@@ -24,91 +135,129 @@ function relativeDate(value: string | null | undefined, t: ReturnType<typeof use
   return t('student.relativeDate.monthsAgo', { months: Math.floor(diff / 30) });
 }
 
+function normalizeStatus(raw: string): string {
+  return normalizeApplicationStatus(raw);
+}
+
 const statusColors: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-700',
-  reviewing: 'bg-blue-100 text-blue-700',
-  interview: 'bg-purple-100 text-purple-700',
-  accepted: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-700',
-  SUBMITTED: 'bg-amber-100 text-amber-700',
-  VIEWED: 'bg-blue-100 text-blue-700',
-  INTERVIEW_REQUESTED: 'bg-purple-100 text-purple-700',
-  HIRED: 'bg-green-100 text-green-700',
-  REJECTED: 'bg-red-100 text-red-700',
+  PENDING: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  INTERVIEW: 'bg-purple-100 text-purple-700 border-purple-200',
+  HIRED: 'bg-green-100 text-green-700 border-green-200',
+  REJECTED: 'bg-red-100 text-red-600 border-red-200',
+};
+
+const STATUS_DOT: Record<string, string> = {
+  PENDING: 'bg-yellow-500',
+  INTERVIEW: 'bg-purple-500',
+  HIRED: 'bg-green-500',
+  REJECTED: 'bg-red-500',
 };
 
 function CompanyLogo({ logoUrl, name }: { logoUrl?: string | null; name?: string }) {
-  if (logoUrl) {
+  const initial = getDisplayInitial(name);
+  const src = toAbsoluteAssetUrl(logoUrl, API_BASE);
+  if (src) {
     return (
       <img
-        src={logoUrl}
-        alt={name ?? 'Empresa'}
+        src={src}
+        alt={name || 'Empresa'}
         className="w-11 h-11 rounded-xl object-cover border border-gray-100 shrink-0"
       />
     );
   }
   return (
     <div className="w-11 h-11 rounded-xl bg-green-100 flex items-center justify-center text-green-700 font-bold text-lg shrink-0">
-      {(name ?? '?')[0].toUpperCase()}
+      {initial}
     </div>
   );
 }
 
-//  Panel de detalle 
 function ApplicationDetailPanel({
   application,
+  locale,
   onClose,
 }: {
-  application: Application;
+  application: NormalizedApplication;
+  locale: string;
   onClose: () => void;
 }) {
   const t = useTranslations('intranet');
-  const sl = (k: string) => { try { return t(`student.applications.statusLabels.${k}` as any); } catch { return k; } };
-  const offer = application.offer;
-  const statusLabel = sl(application.status);
-  const statusColor = statusColors[application.status] ?? 'bg-gray-100 text-gray-700';
-  const companyName = (offer?.company as any)?.companyName ?? (offer?.company as any)?.name;
-  const logoUrl = (offer?.company as any)?.logoUrl;
-  const city = (offer?.company as any)?.city;
+  const labelForStatus = (value: string) => {
+    const normalized = normalizeStatus(value);
+    try {
+      const label = t(`student.applications.statusLabels.${normalized}` as never);
+      if (typeof label === 'string' && !label.includes('student.applications.statusLabels.')) return label;
+    } catch {}
+    return normalized;
+  };
+
+  const normalized = normalizeStatus(application.status);
+  const statusLabel = labelForStatus(application.status);
+  const statusColor = statusColors[normalized] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+  const dotColor = STATUS_DOT[normalized] ?? 'bg-gray-400';
+  const context = application.programContext;
+  const offerHref = context
+    ? buildStudentProgramOfferHref(locale, context.programId, context.programOfferId)
+    : application.offerId
+      ? buildStudentOfferHref(locale, application.offerId)
+      : buildLocaleHref(locale, '/intranet/student/offers');
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden sticky top-4">
-      {/* Cabecera verde */}
       <div className="relative bg-gradient-to-br from-green-600 to-green-800 px-6 pt-6 pb-8">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-white/70 hover:text-white text-lg leading-none"
         >
-          
+          ×
         </button>
         <div className="flex items-center gap-3 mb-4">
-          <CompanyLogo logoUrl={logoUrl} name={companyName} />
+          <CompanyLogo logoUrl={application.companyLogoUrl} name={application.companyName} />
           <div>
-            <h2 className="text-white font-bold text-lg leading-tight">{offer?.title ?? 'Oferta'}</h2>
-            <p className="text-green-200 text-sm">{companyName ?? ''}</p>
+            <h2 className="text-white font-bold text-lg leading-tight">{application.offerTitle || t('student.applications.noTitle')}</h2>
+            <p className="text-green-200 text-sm">{application.companyName}</p>
           </div>
         </div>
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${statusColor}`}>
-          {statusLabel}
-        </span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusColor}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+            {statusLabel}
+          </span>
+          {context && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+              {t('student.applications.programBadge')}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Cuerpo */}
       <div className="px-6 py-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           {application.createdAt && !isNaN(new Date(application.createdAt).getTime()) && (
             <div className="bg-gray-50 rounded-xl p-3">
               <p className="text-xs text-gray-500 mb-0.5">{t('student.applications.detail.sentLabel').replace(':', '')}</p>
-              <p className="text-sm font-semibold text-gray-800">{formatDate(application.createdAt)}</p>
+              <p className="text-sm font-semibold text-gray-800">{formatDate(application.createdAt, locale)}</p>
             </div>
           )}
-          {city && (
+          {application.companyCity && (
             <div className="bg-gray-50 rounded-xl p-3">
               <p className="text-xs text-gray-500 mb-0.5">{t('common.location')}</p>
-              <p className="text-sm font-semibold text-gray-800">{city}</p>
+              <p className="text-sm font-semibold text-gray-800">{application.companyCity}</p>
             </div>
           )}
         </div>
+
+        {context?.programTitle && (
+          <div>
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t('student.applications.programLabel')}</h4>
+            <Link
+              href={buildStudentProgramHref(locale, context.programId)}
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            >
+              {context.programTitle}
+            </Link>
+          </div>
+        )}
 
         {application.coverLetter && (
           <div>
@@ -119,17 +268,17 @@ function ApplicationDetailPanel({
           </div>
         )}
 
-        {(offer as any)?.description && (
+        {application.description && (
           <div>
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
               {t('student.applications.detail.aboutOfferTitle')}
             </h4>
-            <p className="text-sm text-gray-700 line-clamp-4">{(offer as any).description}</p>
+            <p className="text-sm text-gray-700 line-clamp-4">{application.description}</p>
           </div>
         )}
 
         <Link
-          href={`/intranet/student/offers/${(offer as any)?.id ?? application.offerId}`}
+          href={offerHref}
           className="block w-full text-center py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           {t('student.applications.detail.viewFull')}
@@ -139,11 +288,11 @@ function ApplicationDetailPanel({
   );
 }
 
-//  Lista 
 interface ApplicationsListProps {
-  applications: Application[];
+  applications: Array<Application | NormalizedApplication | Record<string, unknown>>;
   showOffer?: boolean;
   showStudent?: boolean;
+  locale?: string;
   onStatusChange?: (applicationId: string, status: Application['status']) => void;
 }
 
@@ -151,13 +300,34 @@ export function ApplicationsList({
   applications = [],
   showOffer = true,
   showStudent = false,
+  locale: localeProp,
   onStatusChange,
 }: ApplicationsListProps) {
   const t = useTranslations('intranet');
-  const sl = (k: string) => { try { return t(`student.applications.statusLabels.${k}` as any); } catch { return k; } };
-  const [selected, setSelected] = useState<Application | null>(null);
+  const detectedLocale = useLocale();
+  const locale = localeProp || detectedLocale;
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  if ((applications ?? []).length === 0) {
+  const statusLabel = (value: string) => {
+    const normalized = normalizeStatus(value);
+    try {
+      const label = t(`student.applications.statusLabels.${normalized}` as never);
+      if (typeof label === 'string' && !label.includes('student.applications.statusLabels.')) return label;
+    } catch {}
+    return normalized;
+  };
+
+  const items = useMemo<NormalizedApplication[]>(
+    () => (applications ?? []).map((application, index) => toNormalized(application, index)),
+    [applications],
+  );
+
+  const selected = useMemo(
+    () => items.find((item) => item.id === selectedId) ?? null,
+    [items, selectedId],
+  );
+
+  if (items.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
         <p className="text-gray-500">{t('student.applications.noApplications')}</p>
@@ -167,48 +337,55 @@ export function ApplicationsList({
 
   return (
     <div className={`grid gap-5 ${showOffer ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
-      {/* Lista de tarjetas */}
       <div className={`space-y-3 ${showOffer ? 'lg:col-span-2' : ''}`}>
-        {(applications ?? []).map((application) => {
-          const offer = application.offer;
+        {items.map((application) => {
           const isSelected = selected?.id === application.id;
-          const statusLabel = sl(application.status);
-          const statusColor = statusColors[application.status] ?? 'bg-gray-100 text-gray-700';
-          const companyName = (offer?.company as any)?.companyName ?? (offer?.company as any)?.name;
-          const logoUrl = (offer?.company as any)?.logoUrl;
-          const city = (offer?.company as any)?.city;
+          const normalized = normalizeStatus(application.status);
+          const cardStatusLabel = statusLabel(application.status);
+          const statusColor = statusColors[normalized] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+          const dotColor = STATUS_DOT[normalized] ?? 'bg-gray-400';
+          const context = application.programContext;
 
           return (
             <div
               key={application.id}
-              onClick={() => showOffer ? setSelected(isSelected ? null : application) : undefined}
+              onClick={() => showOffer ? setSelectedId(isSelected ? null : application.id) : undefined}
               className={`bg-white rounded-2xl border transition-all shadow-sm p-4 ${
                 showOffer ? 'cursor-pointer hover:shadow-md' : ''
               } ${isSelected ? 'border-green-500 shadow-md' : 'border-gray-100'}`}
             >
               <div className="flex items-start gap-3">
-                {showOffer && <CompanyLogo logoUrl={logoUrl} name={companyName} />}
+                {showOffer && <CompanyLogo logoUrl={application.companyLogoUrl} name={application.companyName} />}
 
                 <div className="flex-1 min-w-0">
-                  {showOffer && offer && (
+                  {showOffer && (
                     <>
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-semibold text-gray-900 text-base leading-tight truncate">
-                          {offer.title}
+                          {application.offerTitle || t('student.applications.noTitle')}
                         </h3>
-                        <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>
-                          {statusLabel}
+                        <span className={`shrink-0 inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium border ${statusColor}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+                          {cardStatusLabel}
                         </span>
                       </div>
-                      {companyName && <p className="text-sm text-gray-500 mt-0.5">{companyName}</p>}
+                      {application.companyName && <p className="text-sm text-gray-500 mt-0.5">{application.companyName}</p>}
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        {city && (
+                        {context && (
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-indigo-100 text-indigo-700">
+                            {t('student.applications.programBadge')}
+                          </span>
+                        )}
+                        {context?.programTitle && (
+                          <span className="text-xs text-indigo-500 truncate max-w-[180px]">{context.programTitle}</span>
+                        )}
+                        {application.companyCity && (
                           <span className="text-xs text-gray-400 flex items-center gap-0.5">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            {city}
+                            {application.companyCity}
                           </span>
                         )}
                         {application.createdAt && !isNaN(new Date(application.createdAt).getTime()) && (
@@ -218,17 +395,18 @@ export function ApplicationsList({
                     </>
                   )}
 
-                  {showStudent && application.student && (
+                  {showStudent && (application._raw as any)?.student && (
                     <div className="flex items-start justify-between gap-2">
                       <Link
-                        href={`/intranet/company/applications/${application.id}`}
+                        href={buildCompanyApplicationHref(locale, application.applicationId)}
                         className="font-semibold text-gray-900 hover:text-blue-600"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(event) => event.stopPropagation()}
                       >
-                        {application.student.name}
+                        {(application._raw as any).student.name}
                       </Link>
-                      <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>
-                        {statusLabel}
+                      <span className={`shrink-0 inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium border ${statusColor}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+                        {cardStatusLabel}
                       </span>
                     </div>
                   )}
@@ -237,21 +415,13 @@ export function ApplicationsList({
 
               {onStatusChange && (
                 <div className="mt-2 flex justify-end">
-                  <select
-                    className="text-xs border border-gray-200 rounded-lg px-2 py-1"
-                    value={application.status}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      onStatusChange(application.id, e.target.value as Application['status']);
+                  <ApplicationStatusChanger
+                    applicationId={application.applicationId}
+                    currentStatus={application.status}
+                    onStatusChanged={(id, newStatus) => {
+                      onStatusChange(id, newStatus as Application['status']);
                     }}
-                  >
-                  <option value="pending">{t('student.applications.statusLabels.pending')}</option>
-                    <option value="reviewing">{t('student.applications.statusLabels.reviewing')}</option>
-                    <option value="interview">{t('student.applications.statusLabels.interview')}</option>
-                    <option value="accepted">{t('student.applications.statusLabels.accepted')}</option>
-                    <option value="rejected">{t('student.applications.statusLabels.rejected')}</option>
-                  </select>
+                  />
                 </div>
               )}
             </div>
@@ -259,17 +429,20 @@ export function ApplicationsList({
         })}
       </div>
 
-      {/* Panel de detalle */}
       {showOffer && (
         <div className="lg:col-span-1">
           {selected ? (
-            <ApplicationDetailPanel application={selected} onClose={() => setSelected(null)} />
+            <ApplicationDetailPanel application={selected} locale={locale} onClose={() => setSelectedId(null)} />
           ) : (
             <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center sticky top-4">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
               </div>
               <h3 className="text-base font-semibold text-gray-700 mb-1">{t('student.applications.selectApp')}</h3>

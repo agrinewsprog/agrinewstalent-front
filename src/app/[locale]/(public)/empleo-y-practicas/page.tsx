@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import EmpleoYPracticasPage, {
   generateEmpleoMetadata,
-} from '@/src/features/public/empleo-y-practicas/EmpleoYPracticasPage';
+} from '@/features/public/empleo-y-practicas/EmpleoYPracticasPage';
 
 interface Props {
   params: Promise<{ locale: string }>;

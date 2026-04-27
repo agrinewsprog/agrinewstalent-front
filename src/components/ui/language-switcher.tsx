@@ -1,9 +1,9 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { routing } from '@/src/i18n/routing';
+import { routing } from '@/i18n/routing';
+import { usePathname, useRouter } from '@/i18n/navigation';
 
 const localeLabels: Record<string, string> = {
   en: 'EN',
@@ -20,14 +20,8 @@ export function LanguageSwitcher() {
   const switchLocale = (newLocale: string) => {
     if (newLocale === locale) return;
 
-    // pathname looks like: /en/intranet/company/dashboard
-    // replace the first segment with the new locale
-    const segments = pathname.split('/');
-    segments[1] = newLocale;
-    const newPath = segments.join('/') || `/${newLocale}`;
-
     startTransition(() => {
-      router.push(newPath);
+      router.replace(pathname, { locale: newLocale });
     });
   };
 

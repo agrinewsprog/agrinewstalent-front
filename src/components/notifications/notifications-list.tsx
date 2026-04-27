@@ -1,93 +1,90 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Notification } from '@/src/types';
-import { formatDistanceToNow } from '@/src/lib/date-utils';
+import { useTranslations, useLocale } from 'next-intl';
 import clsx from 'clsx';
+import { Notification } from '@/types';
+import {
+  formatRelativeDate,
+  getNotificationIcon,
+  NormalizedNotification,
+  normalizeNotification,
+  NotificationRole,
+} from '@/lib/frontend/business';
 
 interface NotificationsListProps {
-  notifications: Notification[];
+  notifications: (Notification | NormalizedNotification | Record<string, unknown>)[];
+  role?: NotificationRole;
   onMarkAsRead?: (id: string) => void;
-  onNotificationClick?: (notification: Notification) => void;
+  onNotificationClick?: (notification: NormalizedNotification) => void;
 }
 
 export function NotificationsList({
   notifications = [],
+  role = 'student',
   onMarkAsRead,
   onNotificationClick,
 }: NotificationsListProps) {
   const t = useTranslations('intranet');
-  const handleNotificationClick = (notification: Notification) => {
+  const locale = useLocale();
+
+  const items = notifications
+    .map((notification) => normalizeNotification(notification, locale, role))
+    .filter((item): item is NormalizedNotification => Boolean(item));
+
+  const handleNotificationClick = (notification: NormalizedNotification) => {
     if (!notification.read && onMarkAsRead) {
       onMarkAsRead(notification.id);
     }
-    if (onNotificationClick) {
-      onNotificationClick(notification);
-    }
+    onNotificationClick?.(notification);
   };
 
-  const getTypeIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'application':
-        return '📄';
-      case 'offer':
-        return '💼';
-      case 'program':
-        return '🎓';
-      case 'course':
-        return '📚';
-      case 'system':
-        return '🔔';
-      default:
-        return '📌';
-    }
-  };
-
-  if ((notifications ?? []).length === 0) {
+  if (items.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <p className="text-lg">{t('student.notifications.empty')}</p>
+      <div className="py-12 text-center text-gray-500">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-xl">
+          {getNotificationIcon('system')}
+        </div>
+        <p className="text-lg font-medium text-gray-700">{t('student.notifications.empty')}</p>
+        <p className="mt-1 text-sm text-gray-500">{t('common.notificationsSubtitle')}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      {(notifications ?? []).map((notification) => (
+      {items.map((notification) => (
         <div
           key={notification.id}
           onClick={() => handleNotificationClick(notification)}
           className={clsx(
-            'p-4 border rounded-lg transition-colors cursor-pointer',
+            'cursor-pointer rounded-lg border p-4 transition-colors',
             notification.read
-              ? 'bg-white border-gray-200 hover:bg-gray-50'
-              : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
+              ? 'border-gray-200 bg-white hover:bg-gray-50'
+              : 'border-blue-200 bg-blue-50 hover:bg-blue-100',
           )}
         >
           <div className="flex items-start gap-3">
-            <span className="text-2xl flex-shrink-0">
-              {getTypeIcon(notification.type)}
+            <span className="flex-shrink-0 text-2xl">
+              {getNotificationIcon(notification.type)}
             </span>
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
                 <h3
                   className={clsx(
                     'text-sm font-medium',
-                    notification.read ? 'text-gray-900' : 'text-blue-900'
+                    notification.read ? 'text-gray-900' : 'text-blue-900',
                   )}
                 >
                   {notification.title}
                 </h3>
                 {!notification.read && (
-                  <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1.5"></span>
+                  <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-blue-600" />
                 )}
               </div>
-              <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+              <p className="mt-1 line-clamp-2 text-sm text-gray-600">
                 {notification.message}
               </p>
-              <p className="mt-2 text-xs text-gray-500">
-                {formatDistanceToNow(new Date(notification.createdAt))}
-              </p>
+              <p className="mt-2 text-xs text-gray-500">{formatRelativeDate(notification.createdAt, locale)}</p>
             </div>
           </div>
         </div>
